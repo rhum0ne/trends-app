@@ -1,0 +1,50 @@
+{
+  "name": "uptake-trends",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "run:daily": "tsx --env-file-if-exists=.env.local scripts/run-daily.ts",
+    "bq:schema": "tsx --env-file-if-exists=.env.local scripts/bq-schema.ts",
+    "db:types": "tsx --env-file-if-exists=.env.local scripts/gen-types.ts",
+    "postinstall": "node scripts/copy-flags.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.12.0",
+    "@google-cloud/bigquery": "^9.6.1",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.119.2",
+    "flag-icons": "^7.6.0",
+    "lucide-react": "^1.77.0",
+    "next": "16.4.6",
+    "posthog-js": "^1.453.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "sharp": "^0.35.5",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/turbopack": "4.3.3",
+    "@types/node": "^24.19.2",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^6.3.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.4.6",
+    "supabase": "^3.2.0",
+    "tailwindcss": "4.3.3",
+    "tsx": "^4.23.15",
+    "typescript": "^5",
+    "vitest": "^5.1.1"
+  },
+  "packageManager": "pnpm@8.15.1",
+  "engines": {
+    "node": ">=22"
+  }
+}

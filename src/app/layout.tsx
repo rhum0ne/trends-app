@@ -22,7 +22,11 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0b0a12",
+  // Barre du navigateur : couleur de fond du thème du système (night / day)
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#0b0a12" },
+    { media: "(prefers-color-scheme: light)", color: "#f7f5fb" },
+  ],
   width: "device-width",
   initialScale: 1,
 };

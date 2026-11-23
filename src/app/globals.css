@@ -261,7 +261,12 @@ a { color: inherit; }
 .tr-enter { animation: tr-slide 320ms ease-out both; }
 @keyframes tr-slide { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
 
+/* Pastille d'état de l'écran sans prévision (encre, jamais l'échelle thermique) */
+.tr-status-dot { width: 8px; height: 8px; border-radius: 999px; background: var(--ink); }
+.tr-status-dot.pulse { animation: tr-status-pulse 1.6s ease-in-out infinite; }
+@keyframes tr-status-pulse { 50% { opacity: 0.25; } }
+
 @media (prefers-reduced-motion: reduce) {
-  .tr-track, .tr-live::before, .tr-enter { animation: none; }
+  .tr-track, .tr-live::before, .tr-enter, .tr-status-dot.pulse { animation: none; }
   * { scroll-behavior: auto !important; }
 }

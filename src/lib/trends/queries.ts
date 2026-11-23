@@ -8,6 +8,7 @@ import type { CountryOverview, TrendImage, TrendView } from "@/lib/types";
 import { addDays, countryName, parisToday } from "@/lib/format";
 import { buildTrendView, finalizeDay, imageFromRow } from "./view";
 import { heatLevel, weeklyAverage } from "@/lib/heat";
+import type { RunSummary } from "@/lib/pipeline/schedule";
 
 export const TRENDS_TAG = "trends";
 
@@ -333,4 +334,15 @@ export async function trendDaysPresent(trendId: string): Promise<number> {
   const { count, error } = await db().from("trend_days").select("day", { count: "exact", head: true }).eq("trend_id", trendId);
   if (error) return 0;
   return count ?? 0;
+}
+
+/** Analyses du jour (Paris) pour l'écran sans prévision : état court, mis en cache 1 minute. */
+export async function getTodayRuns(): Promise<RunSummary[]> {
+  "use cache";
+  cacheLife({ stale: 30, revalidate: 60, expire: 300 });
+  cacheTag(TRENDS_TAG);
+  if (!hasDb()) return [];
+  const { data, error } = await db().from("analysis_runs").select("status, started_at, finished_at").eq("day", parisToday());
+  if (error) return [];
+  return (data ?? []) as RunSummary[];
 }

@@ -10,7 +10,7 @@ Maquettes validées par l'humain (pour lui, l'agent n'y a pas accès) : canevas 
 
 1. **La chaleur est l'unité.** Une tendance ne « buzze » pas : elle chauffe. On l'affiche en degrés (`94°`), colorée sur l'échelle thermique ; elle « refroidit » quand elle passe. Le signe ° est le glyphe de la marque.
 2. **Le fil vertical.** L'unité de lecture est la carte story 9:16 avec ses barres de progression en haut. Sur téléphone on fait défiler, sur ordinateur les cartes s'alignent.
-3. **La nuit d'abord.** Fond sombre (`night`) : une salle où seule la chaleur brille. Le thème `day` existe avec les mêmes règles (bouton dans le pied de page, choix gardé dans le navigateur).
+3. **La nuit d'abord.** Fond sombre (`night`) : une salle où seule la chaleur brille. Le thème `day` existe avec les mêmes règles. Par défaut, le site prend le thème du système du visiteur et le suit en direct ; le bouton du pied de page force l'autre (choix gardé dans le navigateur), et revenir au thème du système efface ce choix.
 
 ## Voix
 

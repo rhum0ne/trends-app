@@ -23,6 +23,8 @@ De haut en bas :
 
 Sans tendance du jour (pipeline en échec) : la dernière tendance encore valide avec « Updated {date} ». Jamais de page vide.
 
+- **Sans aucune prévision publiée** (premier jour, base vide) : écran `EmptyForecast` qui dit l'état réel, avec les règles du superviseur (`forecastStatus`) : analyse en cours, prochaine prévision à 06:30 (heure de Paris et UTC), en retard avec l'heure du prochain essai, ou reportée au lendemain. La page se recharge seule (30 s pendant l'analyse). Puis « how it works » en trois étapes et l'échelle de chaleur ; un seul bouton principal, « Explore the API ».
+
 ## `/t/{slug}` — une tendance
 
 1. Fil d'Ariane : Today / {Category} / {title}.

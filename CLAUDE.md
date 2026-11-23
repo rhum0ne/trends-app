@@ -170,7 +170,7 @@ Fonctionnement détaillé : `docs/pages.md`. L'essentiel :
 
 Direction artistique complète : `docs/design.md`. Les règles qui ne se discutent pas :
 
-- **La météo d'internet vue par une caméra thermique**, fond nuit (`night`) par défaut, thème `day` disponible.
+- **La météo d'internet vue par une caméra thermique**, thèmes `night` et `day` : celui du système par défaut (`prefers-color-scheme`, suivi en direct), le bouton du pied de page force l'autre.
 - **L'échelle thermique** `heat-0` (bleu) → `heat-4` (jaune) ne sert qu'à la chaleur, plus le seul bouton principal de chaque écran.
 - **Une seule police : Archivo.** Largeur condensée (`font-stretch: 62%`, 800, minuscules) pour les grands titres et le logo `trends°` uniquement ; largeur normale pour tout le reste, chiffres compris (`font-variant-numeric: tabular-nums`). Aucune police à chasse fixe, sauf dans les exemples de code de `/api`.
 - **De vraies photos**, passées dans le filtre thermique : jamais d'illustration codée à la main, jamais de forme abstraite à la place d'une image.

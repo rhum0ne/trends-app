@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { dailyMissing, decideDaily, decideHourly, parisClock, type RunSummary } from "./schedule";
+import { dailyMissing, decideDaily, decideHourly, forecastStatus, parisClock, type RunSummary } from "./schedule";
 
 // 23 novembre 2026 : heure d'hiver, Paris = UTC+1
 const at = (hhmm: string) => new Date(`2026-11-23T${hhmm}:00+01:00`);
@@ -70,5 +70,24 @@ describe("dailyMissing", () => {
     expect(dailyMissing(at("08:59"), [])).toBe("wait");
     expect(dailyMissing(at("09:00"), [run("failed", "06:30")])).toBe("open");
     expect(dailyMissing(at("11:00"), [run("ok", "10:30")])).toBe("close");
+  });
+});
+
+describe("forecastStatus", () => {
+  it("is scheduled for 06:30 Paris before the morning run, in winter and summer", () => {
+    expect(forecastStatus(at("05:00"), [])).toEqual({ state: "scheduled", nextAt: new Date("2026-11-23T05:30:00Z") });
+    expect(forecastStatus(new Date("2026-07-01T03:00:00Z"), [])).toEqual({ state: "scheduled", nextAt: new Date("2026-07-01T04:30:00Z") });
+  });
+  it("is running while the analysis runs, or when it is due right now", () => {
+    expect(forecastStatus(at("06:40"), [run("running", "06:30", null)])).toEqual({ state: "running" });
+    expect(forecastStatus(at("06:31"), [])).toEqual({ state: "running" });
+  });
+  it("gives the next attempt time while backing off", () => {
+    expect(forecastStatus(at("06:40"), [run("failed", "06:30", "06:32")])).toEqual({ state: "retrying", nextAt: at("06:47") });
+  });
+  it("is delayed after the last attempt, and ready after a success", () => {
+    const runs = [run("failed", "06:30"), run("failed", "06:45"), run("failed", "07:45"), run("fallback", "10:45")];
+    expect(forecastStatus(at("20:00"), runs)).toEqual({ state: "delayed" });
+    expect(forecastStatus(at("20:00"), [run("ok", "06:30")])).toEqual({ state: "ready" });
   });
 });

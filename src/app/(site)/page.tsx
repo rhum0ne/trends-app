@@ -11,7 +11,8 @@ import { HeatScale } from "@/components/HeatBadge";
 import { TrendRow } from "@/components/TrendRow";
 import { ButtonLink } from "@/components/Button";
 import { ApiSnippet } from "@/components/ApiSnippet";
-import { getCountries, getDailyTrends, getWeekly } from "@/lib/trends/queries";
+import { getCountries, getDailyTrends, getTodayRuns, getWeekly } from "@/lib/trends/queries";
+import { EmptyForecast } from "@/components/site/EmptyForecast";
 import { CATEGORY_LABEL, countryName } from "@/lib/format";
 import { SITE_URL } from "@/lib/links";
 import type { TrendView } from "@/lib/types";
@@ -26,15 +27,6 @@ function Section({ id, title, children, aside }: { id?: string; title: string; c
         {aside}
       </div>
       {children}
-    </section>
-  );
-}
-
-function EmptyForecast() {
-  return (
-    <section className="tr-wrap flex min-h-[50vh] flex-col justify-center gap-4 py-16">
-      <h1 className="tr-display m-0 text-[clamp(64px,10vw,140px)]">today&apos;s forecast</h1>
-      <p className="tr-muted m-0 max-w-xl text-lg">The first forecast is being prepared. Come back after the morning update.</p>
     </section>
   );
 }
@@ -55,7 +47,7 @@ async function HomeContent() {
   await connection();
   const [{ day, stale, trends }, countriesRes, weekly, hdrs] = await Promise.all([getDailyTrends(), getCountries(), getWeekly({ limit: 8 }), headers()]);
   const top = trends.find((t) => t.is_top) ?? trends[0];
-  if (!top || !day) return <EmptyForecast />;
+  if (!top || !day) return <EmptyForecast runs={await getTodayRuns()} now={new Date()} />;
   const others = trends.filter((t) => t.id !== top.id);
   const tracked = countriesRes.countries.length;
 

@@ -61,6 +61,7 @@ Les vérifications humaines sont dans `CHECKLIST.md`.
 - [ ] Configuration du VPS, secrets, sauvegardes et vérifications réelles : suivre `CHECKLIST.md`
 - [x] Migrations appliquées au démarrage du conteneur (`scripts/migrate.mjs`, `DATABASE_URL` interne)
 - [x] Superviseur intégré (`/api/cron/tick` toutes les 5 min) : rattrapage, nouveaux essais espacés, bail en base, incident `daily_missing` ; plus de cron externe
+- [x] Écran sans prévision selon l'état réel (en cours, prévue, en retard, reportée) ; thème du système par défaut, suivi en direct
 
 ## Questions ouvertes / blocages
 - Email d'alerte : aucun fournisseur n'est fixé dans `CLAUDE.md`. Implémenté avec Resend si `RESEND_API_KEY` est présent, sinon l'incident est seulement visible dans `/admin`. **Décision humaine.**

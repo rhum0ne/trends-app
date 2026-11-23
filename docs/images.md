@@ -49,7 +49,7 @@ Composant `ThermalImage` (`src/components/ThermalImage.tsx`) : `next/image` (`al
 
 Correspondance : noir → `heat-0` → `heat-1` → `heat-2` → `heat-3` → `heat-4` (zones claires = zones chaudes).
 
-Thème `day` : filtre `#thermal-day`, même table sauf le premier palier, un lilas très clair (`#efecf6`) au lieu du noir — les ombres de la photo deviennent claires, l'échelle de chaleur reste la même. Voiles clairs, texte, stickers et boutons « on photo » à l'encre, crédit sur pastille claire. Les images Open Graph et la carte partageable restent en `#thermal` (night).
+Thème `day` : même filtre `#thermal`, photo estompée à 45 % d'opacité sur le fond clair (`night` du thème day) : tons pastel, mêmes couleurs de chaleur. Voiles clairs, texte, stickers et boutons « on photo » à l'encre, crédit sur pastille claire. Les images Open Graph et la carte partageable restent en `#thermal` (night).
 
 - Prop `variant: "thermal" | "natural" | "cooled"` (`thermal` par défaut ; `natural` pour l'aperçu admin ; `cooled` = niveaux de gris atténués pour les tendances passées).
 - Pendant le chargement : fond `avg_color` passé dans le même dégradé, sans saut de mise en page.

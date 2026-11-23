@@ -70,7 +70,8 @@ jobs:
           COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
         run: |
           if [ -n "$COOLIFY_WEBHOOK_URL" ]; then
-            curl -fsS --max-time 30 -H "Authorization: Bearer $COOLIFY_TOKEN" "$COOLIFY_WEBHOOK_URL"
+            # Coolify ≥ 4.7 : les points d'action (/deploy, /start, /restart) n'acceptent plus que POST
+            curl -fsS --max-time 30 -X POST -H "Authorization: Bearer $COOLIFY_TOKEN" "$COOLIFY_WEBHOOK_URL"
           else
             # Visible dans le résumé du run, pas seulement dans les journaux
             echo "::warning title=No deploy::COOLIFY_WEBHOOK_URL secret is not set: the image was built but Coolify was not asked to deploy it"

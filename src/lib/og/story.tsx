@@ -15,27 +15,39 @@ const ON = ["#ffffff", "#ffffff", "#120f1e", "#120f1e", "#120f1e"];
 
 const fontCache = new Map<number, Promise<ArrayBuffer | null>>();
 
-/** TTF d'Archivo (graisse donnée). Un User-Agent ancien fait servir du TTF par Google Fonts. */
+/**
+ * TTF d'Archivo (graisse donnée). Sans User-Agent de navigateur, Google Fonts sert du TTF
+ * (un User-Agent ancien type MSIE reçoit un format que satori ne lit pas). Un échec n'est pas
+ * gardé en cache : le prochain rendu réessaie.
+ */
 function archivo(weight: number): Promise<ArrayBuffer | null> {
-  if (!fontCache.has(weight)) {
-    fontCache.set(
-      weight,
-      (async () => {
-        try {
-          const css = await fetch(`https://fonts.googleapis.com/css2?family=Archivo:wght@${weight}`, {
-            headers: { "User-Agent": "Mozilla/4.0 (compatible; MSIE 8.0)" },
-            signal: AbortSignal.timeout(5000),
-          }).then((r) => r.text());
-          const url = /src:\s*url\(([^)]+)\)\s*format\('(?:truetype|opentype)'\)/.exec(css)?.[1];
-          if (!url) return null;
-          return await fetch(url, { signal: AbortSignal.timeout(5000) }).then((r) => r.arrayBuffer());
-        } catch {
-          return null;
-        }
-      })(),
-    );
+  const cached = fontCache.get(weight);
+  if (cached) return cached;
+  const p = (async () => {
+    try {
+      const res = await fetch(`https://fonts.googleapis.com/css2?family=Archivo:wght@${weight}`, { signal: AbortSignal.timeout(5000) });
+      if (!res.ok) return null;
+      const url = /src:\s*url\(([^)]+\.(?:ttf|otf))\)/.exec(await res.text())?.[1];
+      if (!url) return null;
+      const font = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      return font.ok ? await font.arrayBuffer() : null;
+    } catch {
+      return null;
+    }
+  })();
+  fontCache.set(weight, p);
+  void p.then((data) => {
+    if (!data) fontCache.delete(weight);
+  });
+  return p;
+}
+
+/** Police introuvable : satori ne peut rien dessiner sans au moins une police. */
+export class OgFontUnavailableError extends Error {
+  constructor() {
+    super("Archivo could not be loaded for image rendering");
+    this.name = "OgFontUnavailableError";
   }
-  return fontCache.get(weight)!;
 }
 
 async function fonts() {
@@ -43,6 +55,8 @@ async function fonts() {
   const out: { name: string; data: ArrayBuffer; weight: 400 | 800; style: "normal" }[] = [];
   if (bold) out.push({ name: "Archivo", data: bold, weight: 800, style: "normal" });
   if (regular) out.push({ name: "Archivo", data: regular, weight: 400, style: "normal" });
+  // Lever ici plutôt que laisser satori échouer en plein flux (réponse vide côté client)
+  if (out.length === 0) throw new OgFontUnavailableError();
   return out;
 }
 

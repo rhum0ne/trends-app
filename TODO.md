@@ -65,5 +65,9 @@ Les vérifications humaines sont dans `CHECKLIST.md`.
 - Script de mesure d'upTake : extrait inconnu ici → variable `NEXT_PUBLIC_UPTAKE_SCRIPT_SRC`.
 - Image Open Graph : `next/og` ne gère pas les polices variables ni `font-stretch` ; le titre y est en Archivo largeur normale (fichier statique chargé depuis Google Fonts au rendu).
 - Premier lancement réel (`pnpm run:daily` avec les clés) non fait ici : aucune clé dans cet environnement.
-- Vérifié en local avec Supabase local (`npx supabase start`) et des données d'exemple : migration OK, accueil et API OK. `/t/{slug}`, `/c/{code}`, `/archive`, `/admin`, carte PNG et OG restent à revoir à l'œil ; le serveur local existant ne répondait pas pendant cette tâche.
+- Vérifié en local avec Supabase local (`npx supabase start`) et des données d'exemple : migration OK, accueil, `/t/{slug}`, `/c/{code}`, `/archive`, `/admin/login`, API, carte PNG et OG revus à l'œil (23/11).
+  - Corrigé : `.env.development.local` utilisait encore `NEXT_PUBLIC_SUPABASE_URL` / `_ANON_KEY` alors que le code lit `SUPABASE_URL` / `SUPABASE_ANON_KEY` (`.env.example`) → aucune lecture en base. `.env.local` a encore les anciens noms (vides) : à renommer en le remplissant.
+  - Corrigé : carte et OG plantaient (« No fonts are loaded ») : Google Fonts ne sert plus de TTF au User-Agent MSIE ; un échec de police n'est plus gardé en cache et la carte répond 503 au lieu d'un flux cassé.
+  - Ajouté : 404 et page d'erreur aux couleurs du site (la 404 par défaut de Next passait le fond en blanc).
+  - Non vérifié : photos (aucune clé Pexels ici), `/admin` connecté (lien magique), thème `day`.
 - `.env.development.local` pointe vers le Supabase local : à supprimer quand le vrai projet est prêt.

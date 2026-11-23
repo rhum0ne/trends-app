@@ -43,13 +43,29 @@ export async function searchPexels(query: string, fetchImpl: typeof fetch = fetc
 }
 
 export const MIN_WIDTH = 1600;
+/** Luminosité moyenne (0–1) sous laquelle une photo sort presque noire du filtre thermique. */
+export const MIN_BRIGHTNESS = 0.12;
+
+/** Luminosité perçue de avg_color (#rrggbb), 0 à 1 ; null si absente ou illisible. */
+export function brightness(hex: string | null): number | null {
+  const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex?.trim() ?? "");
+  if (!m) return null;
+  const [r, g, b] = m.slice(1).map((x) => parseInt(x, 16) / 255);
+  return 0.299 * r + 0.587 * g + 0.114 * b;
+}
+
+/** Une photo trop sombre (nuit noire, salle éteinte) donne un aplat noir une fois filtrée : écartée. */
+export function tooDark(p: Pick<PexelsPhoto, "avg_color">): boolean {
+  const l = brightness(p.avg_color);
+  return l !== null && l < MIN_BRIGHTNESS;
+}
 
 /**
- * pickPhoto : écarte les photos utilisées dans les 30 derniers jours, préfère le paysage d'au moins 1600 px,
- * sinon la première qui reste ; null si rien.
+ * pickPhoto : écarte les photos utilisées dans les 30 derniers jours et les photos trop sombres,
+ * préfère le paysage d'au moins 1600 px, sinon la première qui reste ; null si rien.
  */
 export function pickPhoto(photos: PexelsPhoto[], recentlyUsed: Set<number>): PexelsPhoto | null {
-  const fresh = photos.filter((p) => p && Number.isFinite(p.id) && !recentlyUsed.has(p.id) && p.src?.large2x);
+  const fresh = photos.filter((p) => p && Number.isFinite(p.id) && !recentlyUsed.has(p.id) && p.src?.large2x && !tooDark(p));
   const preferred = fresh.find((p) => p.width >= p.height && p.width >= MIN_WIDTH);
   return preferred ?? fresh[0] ?? null;
 }

@@ -9,6 +9,7 @@ interface Props {
   image: TrendImage | null;
   /** Utilisé si l'image n'a pas de texte alternatif (jamais vide). */
   alt: string;
+  /** Ignoré : le repli sans photo est le même dégradé chaud pour toutes les catégories. */
   category?: string;
   variant?: ThermalVariant;
   sizes?: string;
@@ -21,22 +22,6 @@ interface Props {
   scrim?: "b" | "l";
 }
 
-// Position du champ de repli selon la catégorie : discret, jamais une illustration (docs/images.md § 4).
-const FALLBACK_POS: Record<string, string> = {
-  gaming: "70% 30%",
-  tech: "30% 35%",
-  ai: "55% 25%",
-  entertainment: "65% 60%",
-  sport: "40% 70%",
-  culture: "25% 55%",
-  business: "75% 45%",
-  design: "45% 40%",
-  lifestyle: "60% 75%",
-  food: "35% 30%",
-  music: "50% 60%",
-  other: "50% 50%",
-};
-
 /**
  * La photo de la tendance, passée dans le filtre thermique #thermal défini dans le layout.
  * Le conteneur doit avoir une taille (position relative + dimensions ou aspect-ratio).
@@ -44,7 +29,6 @@ const FALLBACK_POS: Record<string, string> = {
 export function ThermalImage({
   image,
   alt,
-  category = "other",
   variant = "thermal",
   sizes = "100vw",
   priority = false,
@@ -55,15 +39,9 @@ export function ThermalImage({
 }: Props) {
   const cls = ["tr-photo", variant, scrim ? `tr-scrim-${scrim}` : "", className].filter(Boolean).join(" ");
   if (!image) {
-    const pos = FALLBACK_POS[category] ?? FALLBACK_POS.other;
     return (
       <div className={cls} style={style} role="img" aria-label={`${alt} (no photo)`}>
-        <div className="ph-fallback">
-          <div
-            className={`tr-thermal ${variant === "cooled" ? "cooled" : category === "other" ? "warm" : ""}`}
-            style={{ backgroundPosition: pos }}
-          />
-        </div>
+        <div className="ph-fallback" />
       </div>
     );
   }

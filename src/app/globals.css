@@ -136,13 +136,20 @@ a { color: inherit; }
 .tr-thermal.cooled::before { filter: blur(28px) grayscale(1); opacity: 0.35; }
 
 /* Thermal image — la vraie photo, passée dans le filtre #thermal (docs/images.md § 4) */
-.tr-photo { position: relative; overflow: hidden; background: var(--surface-2); isolation: isolate; }
+/* Position par défaut dans le calque components : une classe utilitaire (absolute, fixed…) passée au composant l'emporte.
+   Hors calque, cette règle écrasait `absolute` et la photo du héros faisait 0 px de haut. */
+@layer components { .tr-photo { position: relative; } }
+.tr-photo { overflow: hidden; background: var(--surface-2); isolation: isolate; }
 .tr-photo img { object-fit: cover; }
 .tr-photo.thermal img { filter: url(#thermal); }
 .tr-photo.cooled img { filter: grayscale(1) brightness(0.6) contrast(0.9); }
 .tr-photo .ph-bg { position: absolute; inset: 0; filter: url(#thermal); }
 .tr-photo.cooled .ph-bg { filter: grayscale(1) brightness(0.6); }
-.tr-photo .ph-fallback { position: absolute; inset: 0; opacity: 0.55; }
+/* Sans photo : dégradé chaud jaune → orange → violet (demande de l'humain, 23/11) */
+.tr-photo .ph-fallback { position: absolute; inset: 0;
+  background:
+    radial-gradient(circle at 72% 22%, var(--heat-4) 0%, transparent 46%),
+    linear-gradient(135deg, var(--heat-4) 0%, var(--heat-3) 38%, var(--heat-2) 66%, var(--heat-1) 100%); }
 .tr-photo.cooled .ph-fallback { filter: grayscale(1); opacity: 0.3; }
 .tr-scrim-b::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(11, 10, 18, 0) 30%, rgba(11, 10, 18, 0.88) 100%); pointer-events: none; }
 .tr-scrim-l::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(11, 10, 18, 0.94) 0%, rgba(11, 10, 18, 0.75) 45%, rgba(11, 10, 18, 0.15) 100%); pointer-events: none; }

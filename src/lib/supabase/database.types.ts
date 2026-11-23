@@ -54,6 +54,7 @@ export type TrendRow = {
   hidden_at: string | null;
   peak_heat: number | null;
   peak_day: string | null;
+  analyzed_at: string | null;
   created_at: string;
   updated_at: string;
 };

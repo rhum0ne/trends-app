@@ -5,7 +5,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { betaZodOutputFormat } from "@anthropic-ai/sdk/helpers/beta/zod";
 import type { z } from "zod";
-import { aiDailyBudgetUsd, env, requireEnv } from "@/lib/env";
+import { aiDailyBudgetUsd, aiEffort, env, requireEnv, type AiEffort } from "@/lib/env";
 import { parisToday } from "@/lib/format";
 import { db, hasDb } from "@/lib/supabase/server";
 import { DEFAULT_MODEL, estimateCost, type UsageLike } from "./pricing";
@@ -47,7 +47,7 @@ export interface GenerateOptions<S extends z.ZodType> {
   /** Phase de recherche web avant la sortie structurée ; 8 recherches au plus. */
   webSearch?: { maxUses: number; instructions: string };
   model?: string;
-  effort?: "low" | "medium" | "high" | "xhigh";
+  effort?: AiEffort;
 }
 
 export interface GenerateResult<T> {
@@ -130,7 +130,11 @@ async function runResearch(model: string, system: string, prompt: string, ws: No
   const messages: Anthropic.Beta.BetaMessageParam[] = [{ role: "user", content: `${prompt}\n\n${ws.instructions}` }];
   const all: Anthropic.Beta.BetaContentBlock[] = [];
   const total = { input_tokens: 0, output_tokens: 0, searches: 0 };
+  const cap = Math.min(ws.maxUses, MAX_SEARCHES);
   for (let turn = 0; turn < 4; turn++) {
+    // max_uses vaut par requête : on ne passe que les recherches restantes, relances (pause_turn) comprises
+    const remaining = cap - total.searches;
+    if (turn > 0 && remaining <= 0) break;
     await assertBudget();
     const stream = anthropic().beta.messages.stream({
       model,
@@ -139,7 +143,7 @@ async function runResearch(model: string, system: string, prompt: string, ws: No
       messages,
       thinking: { type: "adaptive" },
       output_config: { effort: effort as "high" },
-      tools: [{ type: "web_search_20260209", name: "web_search", max_uses: Math.min(ws.maxUses, MAX_SEARCHES) }],
+      tools: [{ type: "web_search_20260209", name: "web_search", max_uses: Math.max(1, remaining) }],
       betas: BETAS,
       fallbacks: "default",
     } as Anthropic.Beta.MessageCreateParamsStreaming);
@@ -163,7 +167,7 @@ async function runResearch(model: string, system: string, prompt: string, ws: No
 
 export async function generateStructured<S extends z.ZodType>(opts: GenerateOptions<S>): Promise<GenerateResult<z.infer<S>>> {
   const model = opts.model ?? env("AI_MODEL") ?? DEFAULT_MODEL;
-  const effort = opts.effort ?? "high";
+  const effort = opts.effort ?? aiEffort();
   let research: Research | null = null;
   const totals = { input_tokens: 0, output_tokens: 0, web_searches: 0 };
   let cost = 0;

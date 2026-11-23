@@ -14,6 +14,8 @@ import { attachPhoto } from "@/lib/images/store";
 import type { Category } from "@/lib/types";
 import { closeIncident, openIncident } from "./alerts";
 import { scoreDay, type PrevState, type ScoredTrend } from "./score";
+import { alignWithKnown, heatJumped, splitCandidates, stillAllowed, trendFromRow, KNOWN_WITHIN_DAYS } from "./incremental";
+import type { CheckedTrend } from "@/lib/ai/checks";
 import { pingIndexNow } from "./indexnow";
 
 export interface DailyReport {
@@ -26,6 +28,8 @@ export interface DailyReport {
   rejected: { topic: string; reason: string }[];
   costUsd: number;
   searches: number;
+  /** Analyse incrémentale : sujets envoyés à l'IA (nouveaux, à rafraîchir) et analyses gardées. */
+  incremental?: { fresh: number; refreshed: number; kept: number; hidden: number; aiSkipped: boolean };
   error?: string;
 }
 
@@ -125,7 +129,7 @@ async function uniqueSlug(slug: string, topicKey: string): Promise<string> {
   return `${slug}-${Date.now().toString(36)}`;
 }
 
-async function persist(day: string, scored: ScoredTrend[], existing: Map<string, TrendRow>, factors: Map<string, Record<string, number | null>>): Promise<Map<string, TrendRow>> {
+async function persist(day: string, scored: ScoredTrend[], existing: Map<string, TrendRow>, factors: Map<string, Record<string, number | null>>, analyzedKeys: Set<string>): Promise<Map<string, TrendRow>> {
   const client = db();
   const saved = new Map<string, TrendRow>();
   for (const s of scored) {
@@ -149,6 +153,7 @@ async function persist(day: string, scored: ScoredTrend[], existing: Map<string,
       last_seen: day,
       expires_at: expiresAt(day, s.outlook.expiresInDays),
       updated_at: new Date().toISOString(),
+      ...(analyzedKeys.has(t.topic_key) ? { analyzed_at: new Date().toISOString() } : {}),
       ...peak,
     };
     if (prior) {
@@ -235,41 +240,70 @@ export async function runDaily(opts: { log?: Log; force?: boolean } = {}): Promi
     log(`${candidates.length} candidates`);
     if (candidates.length === 0) throw new Error("no candidates: every source failed or returned nothing");
 
-    // 2. Analyse IA : un nouvel essai, puis repli sur la veille
-    let analysis: AnalysisResult | null = null;
-    let lastError = "";
-    for (let attempt = 1; attempt <= 2 && !analysis; attempt++) {
-      try {
-        log(`Analysis attempt ${attempt}…`);
-        await client.from("analysis_runs").update({ attempt }).eq("id", run.id);
-        analysis = await analyzeDay(day, candidates);
-      } catch (e) {
-        lastError = (e as Error).message.slice(0, 500);
-        log(`  failed: ${lastError}`);
-        if (e instanceof BudgetExceededError) break;
+    // 2. Analyse incrémentale : l'IA ne voit que les sujets nouveaux et les tendances à rafraîchir
+    const { data: knownRows, error: knownErr } = await client.from("trends").select("*").gte("last_seen", addDays(day, -KNOWN_WITHIN_DAYS));
+    if (knownErr) throw new Error(`trends: ${knownErr.message}`);
+    const known = (knownRows ?? []) as TrendRow[];
+    const split = splitCandidates(day, new Date(), candidates, known);
+    let kept: CheckedTrend[] = split.keep.map(trendFromRow).filter(stillAllowed);
+    // Chaleur qui bondit : l'analyse gardée ne dit sans doute plus pourquoi le sujet chauffe
+    const yesterdayGoogle = await loadGoogleItems(addDays(day, -1));
+    if (kept.length) {
+      const { prev } = await loadPrevState(day, kept.map((t) => t.topic_key));
+      const pre = scoreDay({ accepted: kept, results, prev, yesterdayGoogle });
+      const jumped = new Set(pre.published.filter((s) => heatJumped(s.heat, prev.get(s.trend.topic_key)?.hPrev ?? null)).map((s) => s.trend.topic_key));
+      for (const k of split.keep.filter((r) => jumped.has(r.topic_key))) {
+        const c = candidates.find((x) => x.key === k.topic_key || x.key === k.signal_key || matchesTopic(k.topic_key, x.key));
+        if (c) split.refresh.push({ trend: k, candidate: c });
       }
+      kept = kept.filter((t) => !jumped.has(t.topic_key));
     }
-    if (!analysis) {
-      await openIncident("analysis_failed", { day, error: lastError });
-      report.status = "fallback";
-      report.error = lastError;
-      await finish({ status: "fallback", error: lastError, candidates: candidates.length });
-      log("Analysis failed: today keeps yesterday's trends that are still valid.");
-      return report;
-    }
-    await closeIncident("analysis_failed");
-    report.costUsd = analysis.generation.costUsd;
-    report.searches = analysis.generation.research?.searches ?? 0;
-    report.rejected = [...analysis.rejected];
-    log(`${analysis.accepted.length} trends passed the checks, ${analysis.rejected.length} rejected`);
+    const toAnalyze = [...split.fresh, ...split.refresh.map((r) => r.candidate)].sort((a, b) => b.score - a.score);
+    report.incremental = { fresh: split.fresh.length, refreshed: split.refresh.length, kept: kept.length, hidden: split.hidden, aiSkipped: toAnalyze.length === 0 };
+    log(`Incremental: ${split.fresh.length} new, ${split.refresh.length} to refresh, ${kept.length} kept`);
 
-    // 3. Chaleur, score, sélection
-    const keys = analysis.accepted.map((t) => t.topic_key);
-    const [{ prev, existing, history }, yesterdayGoogle] = await Promise.all([loadPrevState(day, keys), loadGoogleItems(addDays(day, -1))]);
-    const { published, unconfirmed } = scoreDay({ accepted: analysis.accepted, results, prev, yesterdayGoogle });
+    let analysis: AnalysisResult | null = null;
+    if (toAnalyze.length > 0) {
+      let lastError = "";
+      for (let attempt = 1; attempt <= 2 && !analysis; attempt++) {
+        try {
+          log(`Analysis attempt ${attempt}…`);
+          await client.from("analysis_runs").update({ attempt }).eq("id", run.id);
+          analysis = await analyzeDay(day, toAnalyze, kept.map((t) => t.title));
+        } catch (e) {
+          lastError = (e as Error).message.slice(0, 500);
+          log(`  failed: ${lastError}`);
+          if (e instanceof BudgetExceededError) break;
+        }
+      }
+      if (!analysis) {
+        await openIncident("analysis_failed", { day, error: lastError });
+        report.status = "fallback";
+        report.error = lastError;
+        await finish({ status: "fallback", error: lastError, candidates: candidates.length });
+        log("Analysis failed: today keeps yesterday's trends that are still valid.");
+        return report;
+      }
+      await closeIncident("analysis_failed");
+      report.costUsd = analysis.generation.costUsd;
+      report.searches = analysis.generation.research?.searches ?? 0;
+      report.rejected = [...analysis.rejected];
+      log(`${analysis.accepted.length} trends passed the checks, ${analysis.rejected.length} rejected`);
+    } else {
+      log("Nothing new today: no AI call, kept analyses only.");
+    }
+
+    // 3. Chaleur, score, sélection : analyses du jour + analyses gardées
+    const knownAll = [...split.keep, ...split.refresh.map((r) => r.trend)];
+    const fresh = (analysis?.accepted ?? []).map((t) => alignWithKnown(t, knownAll));
+    const freshKeys = new Set(fresh.map((t) => t.topic_key));
+    const accepted = [...fresh, ...kept.filter((t) => !freshKeys.has(t.topic_key))];
+    const keys = accepted.map((t) => t.topic_key);
+    const { prev, existing, history } = await loadPrevState(day, keys);
+    const { published, unconfirmed } = scoreDay({ accepted, results, prev, yesterdayGoogle });
     report.rejected.push(...unconfirmed);
     const factors = await computeFactors(day, published, history, existing, results);
-    const saved = await persist(day, published, existing, factors);
+    const saved = await persist(day, published, existing, factors, freshKeys);
 
     // 4. Photos pour les nouvelles tendances (ou sans photo active)
     const ids = [...saved.values()].map((t) => t.id);
@@ -290,11 +324,11 @@ export async function runDaily(opts: { log?: Log; force?: boolean } = {}): Promi
       status: "ok",
       candidates: candidates.length,
       searches: report.searches,
-      search_urls: (analysis.generation.research?.results ?? []).map((r) => r.url) as Json,
+      search_urls: (analysis?.generation.research?.results ?? []).map((r) => r.url) as Json,
       rejected: report.rejected as unknown as Json,
       trends_count: published.length,
-      input_tokens: analysis.generation.usage.input_tokens,
-      output_tokens: analysis.generation.usage.output_tokens,
+      input_tokens: analysis?.generation.usage.input_tokens ?? 0,
+      output_tokens: analysis?.generation.usage.output_tokens ?? 0,
       cost_usd: report.costUsd,
     });
     await pingIndexNow(report.published.map((p) => `/t/${p.slug}`).concat(["/", "/archive"]));

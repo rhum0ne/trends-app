@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { checkImageQuery, CATEGORY_IMAGE_QUERY } from "./queries";
-import { pickPhoto, searchPexels, searchUrl, type PexelsPhoto } from "./pexels";
+import { brightness, pickPhoto, searchPexels, searchUrl, type PexelsPhoto } from "./pexels";
 import { findBlockedWord, isBlocked } from "@/lib/blocklist";
 
 const photo = (id: number, width = 2000, height = 1300): PexelsPhoto => ({
@@ -38,6 +38,13 @@ describe("pickPhoto", () => {
     const photos = [photo(1), photo(2, 1200, 800), photo(3, 2400, 1600)];
     expect(pickPhoto(photos, new Set([1]))?.id).toBe(3);
     expect(pickPhoto([photo(2, 1200, 800)], new Set())?.id).toBe(2);
+  });
+  it("skips photos too dark to show through the thermal filter", () => {
+    const dark = { ...photo(1), avg_color: "#090502" };
+    expect(brightness("#090502")).toBeLessThan(0.05);
+    expect(pickPhoto([dark, photo(2)], new Set())?.id).toBe(2);
+    expect(pickPhoto([dark], new Set())).toBeNull();
+    expect(pickPhoto([{ ...photo(3), avg_color: null }], new Set())?.id).toBe(3);
   });
   it("returns null for an empty or exhausted list", () => {
     expect(pickPhoto([], new Set())).toBeNull();

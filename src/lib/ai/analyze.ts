@@ -22,14 +22,15 @@ Hard rules:
 - "title": lowercase, 28 characters at most, how the trend is shown in big letters (e.g. "gta vi", "black friday").
 - "why": one sentence, 200 characters at most, "why it's heating up".
 - "audiences": 2 to 4 groups with estimated shares that add up to 100.
-- "image_query": English, 2 to 5 words, a generic scene a stock photographer could shoot that evokes the topic. Never the topic itself, never a brand, product, artwork or person name, no capital letters (e.g. GTA VI → "gaming night controller neon", Black Friday → "shopping bags city street").
+- "image_query": English, 2 to 5 words, a generic, well-lit scene a stock photographer could shoot that evokes the topic (avoid dark or night scenes: they render black). Never the topic itself, never a brand, product, artwork or person name, no capital letters (e.g. GTA VI → "gaming night controller neon", Black Friday → "shopping bags city street").
 - "sources": at least 2 pages you actually found with web search, with their exact URL.
 - "signal_key": copy the exact "key" of the candidate this trend comes from.
 - "slug": lowercase words joined by hyphens.
 - "category": one of ${CATEGORIES.join(", ")}.
 - "lifespan": "1-2 days", "3-7 days" or "2+ weeks".`;
 
-export function buildPrompt(day: string, candidates: Candidate[]): string {
+/** `covered` : titres des tendances déjà analysées et gardées aujourd'hui (analyse incrémentale), à ne pas refaire. */
+export function buildPrompt(day: string, candidates: Candidate[], covered: string[] = []): string {
   const lines = candidates.map((c) =>
     JSON.stringify({
       key: c.key,
@@ -48,7 +49,13 @@ export function buildPrompt(day: string, candidates: Candidate[]): string {
 ${lines.join("\n")}
 </candidates>
 
-Select up to ${LIMITS.maxTrends} topics that a maker could use this week: things many people are talking about across countries or communities (games, tech, AI, entertainment, sport, culture, shopping moments, design, food, music…). Prefer fewer good trends over many weak ones. Merge candidates that are the same topic and use the strongest key.`;
+Select up to ${LIMITS.maxTrends} topics that a maker could use this week: things many people are talking about across countries or communities (games, tech, AI, entertainment, sport, culture, shopping moments, design, food, music…). Prefer fewer good trends over many weak ones. Merge candidates that are the same topic and use the strongest key.${
+    covered.length
+      ? `
+
+These trends were already analyzed and are kept as they are; do not research or return them again: ${covered.map((t) => JSON.stringify(t)).join(", ")}.`
+      : ""
+  }`;
 }
 
 const RESEARCH_INSTRUCTIONS = `First, research. Use web search (at most 8 searches in total) to understand why the strongest candidates are heating up right now and whether any is sensitive. Then write short research notes: for each topic you would keep, 2–3 factual lines with the URLs of the pages that support them. Do not output JSON yet.`;
@@ -60,8 +67,8 @@ export interface AnalysisResult {
   generation: Omit<GenerateResult<AnalysisOutput>, "data">;
 }
 
-export async function analyzeDay(day: string, candidates: Candidate[]): Promise<AnalysisResult> {
-  const prompt = buildPrompt(day, candidates);
+export async function analyzeDay(day: string, candidates: Candidate[], covered: string[] = []): Promise<AnalysisResult> {
+  const prompt = buildPrompt(day, candidates, covered);
   const gen = await generateStructured({
     purpose: "daily-analysis",
     system: SYSTEM_PROMPT,

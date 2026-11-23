@@ -5,10 +5,11 @@ Chaque tendance publiée a une vraie photo, choisie automatiquement sur Pexels �
 ## 1. Mots-clés visuels (`image_query`)
 
 - Produits par l'analyse quotidienne (§ 6 de CLAUDE.md) : anglais, 2 à 5 mots, une scène concrète qu'on peut photographier.
+- Scène bien éclairée : une photo sombre (nuit, salle éteinte) sort presque noire du filtre.
 - Décrire une scène générique qui évoque le sujet, **jamais le sujet lui-même** quand c'est une marque, un produit, une œuvre ou une personne :
   - « GTA VI » → `gaming night controller neon`
   - « Black Friday » → `shopping bags city street`
-  - « AI agents » → `laptop code dark room`
+  - « AI agents » → `laptop code bright office`
   - « Ski season » → `skier snowy mountain`
 - Contrôle (`checkImageQuery`, testé) : 2 à 5 mots, aucun mot du `topic`, aucun mot de `src/lib/blocklist.ts`, aucun nom propre. Échec → requête par défaut de la catégorie (`CATEGORY_IMAGE_QUERY` dans `src/lib/images/queries.ts`).
 
@@ -16,7 +17,7 @@ Chaque tendance publiée a une vraie photo, choisie automatiquement sur Pexels �
 
 - `PEXELS_API_KEY` dans `.env.example`, vide. Ne jamais inventer de clé.
 - `src/lib/images/pexels.ts` : `GET https://api.pexels.com/v1/search?query=…&orientation=landscape&per_page=15&size=large`, en-tête `Authorization: <clé>`, délai 10 s. Une erreur, un 429 ou l'absence de clé ne font jamais échouer le pipeline : tendance publiée sans photo.
-- Choix (`pickPhoto`, fonction pure testée) : écarter une photo utilisée dans les 30 derniers jours (`pexels_id`), préférer le paysage d'au moins 1600 px, prendre la première qui reste. Rien → seconde recherche avec la requête de la catégorie → sinon pas de photo.
+- Choix (`pickPhoto`, fonction pure testée) : écarter une photo utilisée dans les 30 derniers jours (`pexels_id`) et une photo trop sombre (`avg_color` de luminosité < 0,12, `MIN_BRIGHTNESS`), préférer le paysage d'au moins 1600 px, prendre la première qui reste. Rien → seconde recherche avec la requête de la catégorie → sinon pas de photo.
 - Copie : télécharger `src.large2x` dans Supabase Storage (bucket public `trend-images`, nom `{slug}-{pexels_id}.jpg`). Le site et l'API ne servent jamais l'adresse de Pexels.
 - Table `trend_images` : `trend_id`, `pexels_id`, `storage_path`, `width`, `height`, `avg_color`, `alt` (le `alt` de Pexels, sinon `image_query`), `photographer`, `photographer_url`, `pexels_url`, `query`, `active`, `created_at` ; une image active par tendance.
 - Volume : une recherche par **nouvelle** tendance, pendant l'analyse quotidienne (10 à 20 requêtes par jour). Jamais pendant une visite ni une requête d'API.
@@ -50,10 +51,10 @@ Correspondance : noir → `heat-0` → `heat-1` → `heat-2` → `heat-3` → `h
 
 - Prop `variant: "thermal" | "natural" | "cooled"` (`thermal` par défaut ; `natural` pour l'aperçu admin ; `cooled` = niveaux de gris atténués pour les tendances passées).
 - Pendant le chargement : fond `avg_color` passé dans le même dégradé, sans saut de mise en page.
-- Sans photo : dégradé discret de la catégorie. Jamais d'image cassée.
+- Sans photo : dégradé chaud jaune → orange → violet (`heat-4` → `heat-1`), le même pour toutes les catégories. Jamais d'image cassée.
 - Le texte posé sur une photo l'est toujours sur un dégradé sombre (contraste 4,5:1).
 - Utilisé : héros de l'accueil et de `/t/{slug}`, cartes story (60 % du haut), vignettes des classements, panneau pays, `AngleCard`, tendances liées, images Open Graph (filtre appliqué au rendu côté serveur avec `sharp`).
 
 ## 5. Tests
 
-`checkImageQuery`, `pickPhoto` (déjà utilisées, format, liste vide), client Pexels avec HTTP simulé (200, 429, délai, sans clé), champ `image` de l'API (présent ou `null`).
+`checkImageQuery`, `pickPhoto` (déjà utilisées, trop sombres, format, liste vide), client Pexels avec HTTP simulé (200, 429, délai, sans clé), champ `image` de l'API (présent ou `null`).

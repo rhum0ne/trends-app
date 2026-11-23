@@ -8,7 +8,7 @@ import { blockedWordSet } from "@/lib/blocklist";
 export const CATEGORY_IMAGE_QUERY: Record<Category, string> = {
   gaming: "gaming night controller neon",
   tech: "laptop desk city night",
-  ai: "laptop code dark room",
+  ai: "laptop code bright office",
   entertainment: "cinema seats red light",
   sport: "stadium lights crowd night",
   culture: "museum crowd gallery light",

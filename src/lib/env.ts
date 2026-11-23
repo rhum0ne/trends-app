@@ -30,6 +30,15 @@ export class MissingEnvError extends Error {
   }
 }
 
+export type AiEffort = "low" | "medium" | "high" | "xhigh";
+const EFFORTS: readonly AiEffort[] = ["low", "medium", "high", "xhigh"];
+
+/** Effort de l'analyse (AI_EFFORT) : low, medium, high (défaut) ou xhigh. Valeur inconnue = high. */
+export function aiEffort(): AiEffort {
+  const v = (env("AI_EFFORT") ?? "").toLowerCase();
+  return (EFFORTS as readonly string[]).includes(v) ? (v as AiEffort) : "high";
+}
+
 export function aiDailyBudgetUsd(): number {
   const n = Number(env("AI_DAILY_BUDGET_USD") ?? "2");
   return Number.isFinite(n) && n >= 0 ? n : 2;

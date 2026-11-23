@@ -308,14 +308,15 @@ a { color: inherit; }
 .tr-hero-title { font-size: clamp(64px, min(18vw, 15svh), 220px); line-height: 0.82; }
 
 /* Défilement magnétique de l'accueil : le haut de page, puis chaque section calée au centre de l'écran.
-   « proximity » : ne cale que près d'une section ; une section plus haute que l'écran se lit librement. */
-html:has(.tr-snap) { scroll-snap-type: y proximity; }
+   « proximity » : ne cale que près d'une section ; une section plus haute que l'écran se lit librement.
+   `data-snap` est posé par <ScrollSnap /> tant que l'accueil est affiché (pas de :has(), voir le composant). */
+html[data-snap] { scroll-snap-type: y proximity; }
 .tr-snap { scroll-snap-align: center; }
 .tr-snap-top { scroll-snap-align: start; scroll-margin-top: calc(var(--ticker-h) + var(--header-h)); }
-html:has(.tr-snap) footer { scroll-snap-align: end; }
+html[data-snap] footer { scroll-snap-align: end; }
 
 @media (prefers-reduced-motion: reduce) {
   .tr-track, .tr-live::before, .tr-enter, .tr-status-dot.pulse { animation: none; }
   * { scroll-behavior: auto !important; }
-  html:has(.tr-snap) { scroll-snap-type: none; }
+  html[data-snap] { scroll-snap-type: none; }
 }

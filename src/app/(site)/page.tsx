@@ -14,6 +14,7 @@ import { ButtonLink } from "@/components/Button";
 import { ApiSnippet } from "@/components/ApiSnippet";
 import { getCountries, getDailyTrends, getTodayRuns, getWeekly } from "@/lib/trends/queries";
 import { EmptyForecast } from "@/components/site/EmptyForecast";
+import { ScrollSnap } from "@/components/site/ScrollSnap";
 import { CATEGORY_LABEL, countryName } from "@/lib/format";
 import { SITE_URL } from "@/lib/links";
 import type { TrendView } from "@/lib/types";
@@ -77,6 +78,7 @@ async function HomeContent() {
   return (
     <>
       <JsonLd data={trendListJsonLd(`Today's trends, ${day}`, [top, ...others])} />
+      <ScrollSnap />
       <TrendHero trend={top} trackedCountries={tracked} stale={stale} />
 
       <section className="tr-wrap tr-snap grid gap-6 py-8 md:grid-cols-[1.2fr_1fr]" aria-label="Forecast">

@@ -22,7 +22,7 @@ De haut en bas :
 6. **Encart API** : « the forecast, as json », une phrase, bouton « Read the API docs », exemple d'appel.
 7. Pied de page.
 
-**Défilement magnétique** (`tr-snap`, CSS `scroll-snap-type: y proximity`) : le haut de page se cale sur le héros, chaque section suivante au centre de l'écran ; une section plus haute que l'écran se lit librement. Coupé avec `prefers-reduced-motion`.
+**Défilement magnétique** (`tr-snap`, CSS `scroll-snap-type: y proximity`) : le haut de page se cale sur le héros, chaque section suivante au centre de l'écran ; une section plus haute que l'écran se lit librement. Coupé avec `prefers-reduced-motion`. Activé par `<ScrollSnap />` (`html[data-snap]`) tant que l'accueil est affiché, jamais par `html:has(.tr-snap)` : Next garde l'accueil caché dans le DOM après une navigation, et la page suivante s'ouvrait calée sur son pied de page.
 
 Sans tendance du jour (pipeline en échec) : la dernière tendance encore valide avec « Updated {date} ». Jamais de page vide.
 

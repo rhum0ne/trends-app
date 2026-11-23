@@ -57,7 +57,7 @@ Les vérifications humaines sont dans `CHECKLIST.md`.
 - [x] Instance dédiée trends° documentée dans Coolify, réseau interne, tunnel SSH et variables sans dépendance à supabase.com
 - [x] Image standalone non-root, `/api/health` avec contrôle DB limité à 2 s, GH Actions → GHCR → webhook Coolify
 - [x] Procédure de déploiement, DNS, cron, sauvegardes, restauration, mémoire, mise à jour mensuelle et ports publics documentés
-- [x] Chargement d'images autorisé depuis `api-trends.uptake.me` ; panneau pays élargi sous la grille
+- [x] Chargement d'images autorisé depuis `supabase.trends.uptake.me` (ancien nom `api-trends` abandonné) ; panneau pays élargi sous la grille
 - [ ] Configuration du VPS, secrets, sauvegardes et vérifications réelles : suivre `CHECKLIST.md`
 
 ## Questions ouvertes / blocages

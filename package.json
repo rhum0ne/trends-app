@@ -13,7 +13,8 @@
     "run:daily": "tsx --env-file-if-exists=.env.local scripts/run-daily.ts",
     "bq:schema": "tsx --env-file-if-exists=.env.local scripts/bq-schema.ts",
     "db:types": "tsx --env-file-if-exists=.env.local scripts/gen-types.ts",
-    "postinstall": "node scripts/copy-flags.mjs"
+    "postinstall": "node scripts/copy-flags.mjs",
+    "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.12.0",
@@ -37,6 +38,7 @@
     "@vitejs/plugin-react": "^6.3.0",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "postgres": "4.1.1",
     "supabase": "^3.2.0",
     "tailwindcss": "4.3.3",
     "tsx": "^4.23.15",

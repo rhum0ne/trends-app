@@ -11,7 +11,11 @@ export function db(): Db {
   if (cached) return cached;
   cached = createClient<Database>(env("SUPABASE_INTERNAL_URL") ?? requireEnv("SUPABASE_URL"), requireEnv("SUPABASE_SERVICE_ROLE_KEY"), {
     auth: { persistSession: false, autoRefreshToken: false },
-    global: { headers: { "x-client-info": "uptake-trends" } },
+    global: {
+      headers: { "x-client-info": "uptake-trends" },
+      // Kong injoignable : échouer en 10 s plutôt que laisser la page charger indéfiniment
+      fetch: (input, init) => fetch(input, { ...init, signal: init?.signal ?? AbortSignal.timeout(10_000) }),
+    },
   });
   return cached;
 }

@@ -15,10 +15,10 @@ Sans aucune clé : le site affiche la page d'attente (ou les états vides si `PU
 ## 1. Supabase auto-hébergé dans Coolify
 
 1. Sur le VPS, créer dans Coolify un nouveau **Service Supabase** dédié, projet `trends`. Ne pas partager de conteneur, volume, base ni secret avec upTake.
-2. Configurer Kong sur `api-trends.uptake.me`. Studio peut être sur `studio-trends.uptake.me` derrière un mot de passe, ou ne pas être exposé.
+2. Configurer Kong sur `supabase.trends.uptake.me`. Studio peut être sur `studio-trends.uptake.me` derrière un mot de passe, ou ne pas être exposé.
 3. Conserver dans le gestionnaire de mots de passe les clés `anon`, `service_role`, le secret JWT et le mot de passe Postgres générés par Coolify. Ne jamais les commiter.
 4. Définir `SUPABASE_URL` comme l’URL publique HTTPS de Kong, utilisée pour les images du bucket. Définir `SUPABASE_INTERNAL_URL` comme l’adresse interne Kong de Coolify lorsque disponible. Renseigner les clés dans `SUPABASE_ANON_KEY` et `SUPABASE_SERVICE_ROLE_KEY`.
-5. Ne pas exposer Postgres (5432). Pour appliquer les migrations depuis un poste, ouvrir un tunnel SSH vers le port privé, définir `DATABASE_URL` avec l’adresse locale du tunnel, puis lancer `supabase db push --db-url "$DATABASE_URL"`. La migration crée les tables, active RLS et crée le bucket public `trend-images`. Avec le tunnel ouvert, `pnpm db:types` peut régénérer les types TypeScript depuis cette même base.
+5. Ne pas exposer Postgres (5432). Activer « Connect to Predefined Network » sur le service Supabase et définir dans l’application `DATABASE_URL` vers `supabase-db-<uuid>:5432` : les migrations sont appliquées au démarrage du conteneur (docs/deploy.md § 3). La migration crée les tables, active RLS et crée le bucket public `trend-images`. Avec un tunnel SSH ouvert, `pnpm db:types` peut régénérer les types TypeScript depuis cette même base.
 6. Dans les réglages Auth de cette instance, configurer `https://trends.uptake.me` comme Site URL et `/auth/callback` en URL de redirection. Vérifier le fournisseur Email pour les liens magiques et définir `ADMIN_EMAILS`.
 7. Détails de mise en service : `docs/deploy.md`.
 

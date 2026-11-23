@@ -3,10 +3,10 @@
 Ce que l'agent ne peut pas faire (comptes, clés, lectures de conditions, décisions). Détail pas à pas : `SETUP.md`.
 
 ## Clés et comptes
-- [ ] Service Supabase auto-hébergé dédié à trends° dans Coolify ; domaines Kong `api-trends.uptake.me` et Studio protégé ou non exposé
+- [ ] Service Supabase auto-hébergé dédié à trends° dans Coolify ; domaines Kong `supabase.trends.uptake.me` et Studio protégé ou non exposé
 - [ ] Enregistrer dans le gestionnaire de mots de passe les clés anon/service_role, JWT secret et mot de passe Postgres ; ne rien réutiliser d’upTake
 - [ ] `SUPABASE_URL`, `SUPABASE_INTERNAL_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` définis dans Coolify ; service role côté serveur seulement
-- [ ] Tunnel SSH établi, `DATABASE_URL` local configurée, migrations `supabase db push --db-url "$DATABASE_URL"` appliquées ; RLS et bucket `trend-images` vérifiés
+- [ ] `DATABASE_URL` interne définie dans l’application ; journaux du déploiement : `[migrate] applied …` ; RLS et bucket `trend-images` vérifiés
 - [ ] Supabase Auth : Site URL + Redirect URL `/auth/callback` ; `ADMIN_EMAILS`
 - [ ] Google Cloud : projet, API BigQuery, compte de service « BigQuery Job User » ; `GOOGLE_CLOUD_PROJECT`, `GOOGLE_SERVICE_ACCOUNT_JSON`
 - [ ] **`pnpm bq:schema`** : confirmer le schéma réel des 4 tables Google Trends (non vérifié par l'agent, voir `docs/heat.md` § Précisions)
@@ -36,7 +36,7 @@ Ce que l'agent ne peut pas faire (comptes, clés, lectures de conditions, décis
 ## Déploiement (`docs/deploy.md`)
 - [ ] Secrets GitHub `NEXT_PUBLIC_*`, `COOLIFY_WEBHOOK_URL`, `COOLIFY_TOKEN`
 - [ ] Applications dédiées trends° dans Coolify (Supabase + image GHCR, port 3000, health `/api/health`, domaine, variables)
-- [ ] DNS `trends`, `api-trends` et éventuellement `studio-trends` → VPS (Cloudflare : SSL Full strict)
+- [ ] DNS `trends`, `supabase.trends` et éventuellement `studio-trends` → VPS (Cloudflare : SSL Full strict)
 - [ ] Postgres non exposé ; ports publics limités à 80/443 et SSH
 - [ ] Lignes cron sur le VPS (06:30 Europe/Paris + horaire)
 - [ ] Sauvegarde Postgres quotidienne, 14 jours, vers S3 externe ; volume Storage sauvegardé

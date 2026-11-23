@@ -5,29 +5,25 @@ trends° est une application distincte d’upTake, avec son propre service Supab
 ## 1. Créer Supabase dans Coolify
 
 1. Dans Coolify, créer une nouvelle ressource de type **Service Supabase**, avec le nom de projet `trends`. Cette instance est réservée à trends°.
-2. Configurer le domaine Kong de l’API en `api-trends.uptake.me`. Exposer Studio sur `studio-trends.uptake.me` uniquement si nécessaire et le protéger par mot de passe ; sinon ne pas l’exposer.
+2. Configurer le domaine Kong de l’API en `supabase.trends.uptake.me`. Exposer Studio sur `studio-trends.uptake.me` uniquement si nécessaire et le protéger par mot de passe ; sinon ne pas l’exposer.
 3. Après le démarrage, relever dans le gestionnaire de mots de passe les clés `anon` et `service_role`, le secret JWT et le mot de passe Postgres générés par Coolify. Ne jamais les mettre dans le dépôt.
 4. Garder Postgres sur le réseau Docker interne. Aucun port Postgres (5432) ne doit être exposé sur Internet.
 
 ## 2. Réseau et variables Supabase
 
 - Dans Coolify, fournir à l’application l’URL interne Kong du service Supabase en `SUPABASE_INTERNAL_URL` lorsque le réseau interne est disponible. L’application utilise cette URL pour la base et l’authentification côté serveur.
-- `SUPABASE_URL` est l’URL HTTPS publique `api-trends.uptake.me`. Elle sert à produire les URL des images du bucket `trend-images`, chargées par le navigateur.
+- `SUPABASE_URL` est l’URL HTTPS publique `supabase.trends.uptake.me`. Elle sert à produire les URL des images du bucket `trend-images`, chargées par le navigateur.
 - Les deux URL pointent vers l’instance dédiée trends°. Ne configurez aucune URL ou clé issue du projet upTake ou de supabase.com.
 - Les clés `SUPABASE_ANON_KEY` et `SUPABASE_SERVICE_ROLE_KEY` sont celles créées par cette instance. La clé service reste exclusivement côté serveur et n’a jamais de préfixe `NEXT_PUBLIC_`.
-- `DATABASE_URL` est l’URL PostgreSQL de migration, utilisée depuis le poste à travers un tunnel SSH. Ne publiez pas le port 5432.
+- `DATABASE_URL` est l’URL PostgreSQL interne du service (`postgresql://postgres:<mot de passe encodé>@supabase-db-<uuid>:5432/postgres`), utilisée par le conteneur pour appliquer les migrations. Elle exige « Connect to Predefined Network » sur le service Supabase. Ne publiez pas le port 5432.
 
-## 3. Appliquer les migrations depuis un poste
+## 3. Migrations automatiques
 
-1. Ouvrir un tunnel SSH vers le Postgres privé du service Supabase. Le port local est celui choisi pour le tunnel ; le port distant reste celui du service dans le réseau privé.
-2. Définir `DATABASE_URL` avec le tunnel local et le mot de passe Postgres conservé dans le gestionnaire de mots de passe, puis appliquer les migrations :
-
-   ```sh
-   supabase db push --db-url "$DATABASE_URL"
-   ```
-
-3. La migration versionnée dans `supabase/migrations/` crée les tables, active RLS sur chacune et crée le bucket public `trend-images` pour la lecture des objets. Le bucket est public en lecture ; les écritures restent côté serveur.
-4. Tester l’authentification admin et conserver les clés/URL de cette instance dans le gestionnaire de mots de passe.
+1. À chaque démarrage, le conteneur lance `node migrator/migrate.mjs` puis le serveur (`Dockerfile`). Le script applique les fichiers de `supabase/migrations/` absents de `supabase_migrations.schema_migrations` (la table de la CLI Supabase), chacun dans sa transaction, sous un verrou consultatif.
+2. Sans `DATABASE_URL`, l’étape est ignorée. Si une migration échoue, le conteneur s’arrête avant le serveur : le contrôle de santé échoue et Coolify garde l’ancienne version. Le message d’erreur Postgres est dans les journaux du déploiement.
+3. La migration initiale crée les tables, active RLS sur chacune et crée le bucket public `trend-images` pour la lecture des objets. Le bucket est public en lecture ; les écritures restent côté serveur.
+4. En local : `pnpm db:migrate` avec `DATABASE_URL` vers la base de `supabase start`. Un tunnel SSH n’est plus nécessaire que pour `pnpm db:types` sur la base de production.
+5. Tester l’authentification admin et conserver les clés/URL de cette instance dans le gestionnaire de mots de passe.
 
 ## 4. Construire et publier l’image
 
@@ -66,7 +62,7 @@ docker run --env-file .env.local -p 3000:3000 uptake-trends
 
 ## 6. DNS et ports
 
-Créer des enregistrements A pour `trends`, `api-trends` et, si Studio est exposé, `studio-trends`, pointant vers l’adresse IP du VPS. Si Cloudflare est devant, activer le proxy et choisir SSL **Full (strict)**.
+Créer des enregistrements A pour `trends`, `supabase.trends` et, si Studio est exposé, `studio-trends`, pointant vers l’adresse IP du VPS. Si Cloudflare est devant, activer le proxy et choisir SSL **Full (strict)**.
 
 Sur le VPS, seuls 80/443 et SSH sont ouverts. Postgres (5432), les ports internes Supabase et tout port de service de l’application restent fermés depuis Internet.
 

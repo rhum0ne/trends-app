@@ -188,7 +188,7 @@ pnpm lint
 pnpm typecheck
 pnpm run:daily    # lance le pipeline une fois en local (sources réelles, IA et Pexels si les clés sont là)
 pnpm db:types     # régénère les types Supabase
-supabase db push  # applique les migrations (lancé par l'humain)
+pnpm db:migrate   # applique les migrations en attente (DATABASE_URL) ; en production, fait au démarrage du conteneur
 ```
 
 ## 12. Méthode de travail
@@ -201,3 +201,4 @@ supabase db push  # applique les migrations (lancé par l'humain)
 6. Tâche bloquée (clé manquante, API qui change) : faire la version minimale qui ne casse rien, la mettre derrière un drapeau, noter le blocage dans `TODO.md`, passer à la suite.
 7. Next.js 16 avec Cache Components : aucune page ne lit la base au build (`await connection()` dans un composant sous `<Suspense>`) ; les lectures passent par `src/lib/trends/queries.ts` (`"use cache"`, 10 min, tag `trends`), et toute écriture visible invalide ce tag (`updateTag` dans une action, `revalidateTag` ailleurs).
 8. Le schéma BigQuery est vérifié à chaque collecte (`INFORMATION_SCHEMA`) ; `pnpm bq:schema` l'affiche. Une colonne qui change = mettre à jour `src/lib/sources/google.ts` et `docs/heat.md`.
+9. Migrations : un fichier `supabase/migrations/<version>_<nom>.sql` par changement, jamais modifié une fois poussé ; elles sont appliquées automatiquement au démarrage du conteneur (`scripts/migrate.mjs`, même suivi que la CLI Supabase). Une migration en échec empêche le démarrage : la tester en local d'abord.

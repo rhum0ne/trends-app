@@ -132,7 +132,7 @@ async function TrendContent({ slug }: { slug: string }) {
 
       <section className="relative isolate overflow-hidden" aria-labelledby="trend-title">
         <ThermalImage image={trend.image} alt={trend.title} category={trend.category} variant={cooled ? "cooled" : "thermal"} className="absolute inset-0 -z-10" scrim="l" priority credit />
-        <div className="tr-wrap grid items-end gap-8 py-12 lg:grid-cols-[1fr_300px]" style={{ color: "#f5f3ff" }}>
+        <div className="tr-wrap tr-on-photo grid items-end gap-8 py-12 lg:grid-cols-[1fr_300px]">
           <div className="flex flex-col gap-5">
             <div className="flex flex-wrap gap-2">
               <CategorySticker category={trend.category} onPhoto />

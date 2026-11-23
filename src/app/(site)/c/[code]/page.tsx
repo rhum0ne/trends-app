@@ -49,7 +49,7 @@ async function CountryContent({ params }: { params: PageProps<"/c/[code]">["para
       </div>
 
       {top ? (
-        <Link href={`/t/${top.slug}`} className="relative isolate block overflow-hidden rounded-[24px] no-underline" style={{ color: "#f5f3ff" }}>
+        <Link href={`/t/${top.slug}`} className="tr-on-photo relative isolate block overflow-hidden rounded-[24px] no-underline">
           <ThermalImage image={top.image} alt={top.title} category={top.category} className="absolute inset-0 -z-10" scrim="l" sizes="(max-width: 1240px) 100vw, 1180px" credit />
           <div className="flex min-h-[300px] flex-col justify-end gap-3 p-6">
             <p className="m-0 text-sm font-bold uppercase">#1 in {name} today</p>

@@ -49,10 +49,12 @@ Composant `ThermalImage` (`src/components/ThermalImage.tsx`) : `next/image` (`al
 
 Correspondance : noir → `heat-0` → `heat-1` → `heat-2` → `heat-3` → `heat-4` (zones claires = zones chaudes).
 
+Thème `day` : filtre `#thermal-day`, même table sauf le premier palier, un lilas très clair (`#efecf6`) au lieu du noir — les ombres de la photo deviennent claires, l'échelle de chaleur reste la même. Voiles clairs, texte, stickers et boutons « on photo » à l'encre, crédit sur pastille claire. Les images Open Graph et la carte partageable restent en `#thermal` (night).
+
 - Prop `variant: "thermal" | "natural" | "cooled"` (`thermal` par défaut ; `natural` pour l'aperçu admin ; `cooled` = niveaux de gris atténués pour les tendances passées).
 - Pendant le chargement : fond `avg_color` passé dans le même dégradé, sans saut de mise en page.
 - Sans photo : dégradé chaud jaune → orange → violet (`heat-4` → `heat-1`), le même pour toutes les catégories. Jamais d'image cassée.
-- Le texte posé sur une photo l'est toujours sur un dégradé sombre (contraste 4,5:1).
+- Le texte posé sur une photo l'est toujours sur un voile (sombre en `night`, clair en `day`, classe `tr-on-photo`) : contraste 4,5:1.
 - Utilisé : héros de l'accueil et de `/t/{slug}`, cartes story (60 % du haut), vignettes des classements, panneau pays, `AngleCard`, tendances liées, images Open Graph (filtre appliqué au rendu côté serveur avec `sharp`).
 
 ## 5. Tests

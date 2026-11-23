@@ -55,7 +55,7 @@ function CardBody({ trend, index = 0, total = 1, example }: Props) {
             <span>Worldwide</span>
           )}
         </span>
-        {example ? <span className="tr-example" style={{ color: "#f5f3ff" }}>Example</span> : null}
+        {example ? <span className="tr-example">Example</span> : null}
       </div>
       <div className="flex flex-wrap gap-2">
         <CategorySticker category={trend.category} onPhoto />
@@ -106,7 +106,7 @@ export function CooledCard({ trend, example = false, linked = true, className = 
         </div>
         <div className="tr-story-head">
           <span>Cooled</span>
-          {example ? <span className="tr-example" style={{ color: "#f5f3ff" }}>Example</span> : null}
+          {example ? <span className="tr-example">Example</span> : null}
         </div>
         <h3 className="tr-story-title">{trend.title}</h3>
         <p className="tr-story-why">

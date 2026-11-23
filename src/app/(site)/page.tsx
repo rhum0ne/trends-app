@@ -19,7 +19,7 @@ import type { TrendView } from "@/lib/types";
 
 function Section({ id, title, children, aside }: { id?: string; title: string; children: React.ReactNode; aside?: React.ReactNode }) {
   return (
-    <section id={id} className="tr-wrap flex scroll-mt-16 flex-col gap-6 pt-16" aria-labelledby={id ? `${id}-title` : undefined}>
+    <section id={id} className="tr-wrap tr-snap flex flex-col gap-6 py-8" aria-labelledby={id ? `${id}-title` : undefined}>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <h2 id={id ? `${id}-title` : undefined} className="tr-section-title">
           {title}
@@ -73,7 +73,7 @@ async function HomeContent() {
     <>
       <TrendHero trend={top} trackedCountries={tracked} stale={stale} />
 
-      <section className="tr-wrap grid gap-6 pt-8 md:grid-cols-[1.2fr_1fr]" aria-label="Forecast">
+      <section className="tr-wrap tr-snap grid gap-6 py-8 md:grid-cols-[1.2fr_1fr]" aria-label="Forecast">
         <Forecast forecast={top.forecast} startDay={day} best={top.best_window} title={`${top.title}: 5-day forecast`} />
         <div className="tr-forecast flex flex-col justify-center gap-3">
           <h3 className="m-0 text-[15px] font-bold">How hot is hot?</h3>

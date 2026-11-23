@@ -72,7 +72,11 @@ export function ThermalImage({
   );
 }
 
-/** Le filtre SVG, défini une seule fois dans le layout (docs/images.md § 4). */
+/**
+ * Les filtres SVG, définis une seule fois dans le layout (docs/images.md § 4).
+ * #thermal (night) : noir → heat-0 → … → heat-4. #thermal-day : même échelle, mais les ombres partent
+ * d'un lilas très clair (#efecf6, surface-2 du thème day) au lieu du noir.
+ */
 export function ThermalFilterDefs() {
   return (
     <svg width="0" height="0" aria-hidden="true" style={{ position: "absolute" }} focusable="false">
@@ -82,6 +86,14 @@ export function ThermalFilterDefs() {
           <feFuncR type="table" tableValues="0.043 0.141 0.482 0.894 1 1" />
           <feFuncG type="table" tableValues="0.039 0.341 0.235 0.208 0.478 0.847" />
           <feFuncB type="table" tableValues="0.071 1 1 0.549 0.102 0.302" />
+        </feComponentTransfer>
+      </filter>
+      <filter id="thermal-day" colorInterpolationFilters="sRGB">
+        <feColorMatrix type="saturate" values="0" />
+        <feComponentTransfer>
+          <feFuncR type="table" tableValues="0.937 0.141 0.482 0.894 1 1" />
+          <feFuncG type="table" tableValues="0.925 0.341 0.235 0.208 0.478 0.847" />
+          <feFuncB type="table" tableValues="0.965 1 1 0.549 0.102 0.302" />
         </feComponentTransfer>
       </filter>
     </svg>

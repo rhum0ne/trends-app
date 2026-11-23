@@ -11,7 +11,8 @@ const NAV = [
 
 export function Header() {
   return (
-    <header className="tr-wrap flex flex-wrap items-center justify-between gap-x-6 gap-y-3 py-4">
+    // Hauteur minimale --header-h (globals.css) : le héros de l'accueil s'en sert pour remplir le reste de l'écran
+    <header className="tr-wrap flex min-h-(--header-h) flex-wrap content-center items-center justify-between gap-x-6 gap-y-3">
       <div className="flex items-center gap-6">
         <Logo size={36} />
         <nav aria-label="Main" className="hidden md:block">

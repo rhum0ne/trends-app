@@ -9,7 +9,8 @@ Données : uniquement ce que sert notre propre API (`src/lib/trends/queries.ts` 
 De haut en bas :
 
 1. **La tendance du moment, worldwide** (`TrendHero`)
-   - Photo thermique de la tendance en fond, plein cadre, avec un dégradé sombre à gauche pour le texte ; crédit Pexels discret en bas à droite.
+   - Remplit l'écran sous le ticker et l'en-tête (`100svh` moins `--ticker-h` et `--header-h`) : tout le héros, boutons compris, se voit sans défiler ; le titre et les espacements suivent aussi la hauteur de l'écran.
+   - Photo thermique de la tendance en fond, plein cadre, avec un voile à gauche pour le texte (sombre en `night`, clair en `day`, texte à l'encre) ; crédit Pexels discret en bas à droite.
    - « Right now · worldwide », stickers (catégorie, Brand-safe, « Heatwave · day N » si au-dessus de 90° depuis plusieurs jours).
    - Titre géant en minuscules, phrase « why ».
    - Degré en grand (`HeatBadge xl`), variation « ▲ 12° since yesterday » (Archivo 800, couleur `safe` ou `ink-muted`), « #1 in 41 of 50 countries » suivi des drapeaux des 6 à 8 pays les plus chauds.
@@ -20,6 +21,8 @@ De haut en bas :
 5. **« this week, worldwide »** : classement des 6 à 10 tendances de la semaine (`TrendRow` avec vignette photo), rang, ▲ / ▼ / NEW, courbe 7 jours, degré.
 6. **Encart API** : « the forecast, as json », une phrase, bouton « Read the API docs », exemple d'appel.
 7. Pied de page.
+
+**Défilement magnétique** (`tr-snap`, CSS `scroll-snap-type: y proximity`) : le haut de page se cale sur le héros, chaque section suivante au centre de l'écran ; une section plus haute que l'écran se lit librement. Coupé avec `prefers-reduced-motion`.
 
 Sans tendance du jour (pipeline en échec) : la dernière tendance encore valide avec « Updated {date} ». Jamais de page vide.
 

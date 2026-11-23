@@ -64,7 +64,12 @@
   --radius-md: 14px;
   --radius-lg: 24px;
   --radius-pill: 999px;
+
+  /* Hauteurs fixes du haut de page (ticker + en-tête) : le héros de l'accueil prend le reste de l'écran */
+  --ticker-h: 36px;
+  --header-h: 100px;
 }
+@media (min-width: 48rem) { :root { --header-h: 68px; } }
 
 @theme inline {
   --color-night: var(--night);
@@ -121,6 +126,9 @@ a { color: inherit; }
 .tr-heat.xl.l0 { color: var(--heat-0); } .tr-heat.xl.l1 { color: var(--heat-1); } .tr-heat.xl.l2 { color: var(--heat-2); }
 .tr-heat.xl.l3 { color: var(--heat-3); } .tr-heat.xl.l4 { color: var(--heat-4); }
 .tr-heat.xl.cooled { box-shadow: none; }
+/* Thème day : orange et jaune n'ont pas le contraste voulu en texte sur fond clair → pastille pleine */
+[data-theme="day"] .tr-heat.xl.l3 { background: var(--heat-3); color: var(--on-hot); padding: 4px 16px 6px; }
+[data-theme="day"] .tr-heat.xl.l4 { background: var(--heat-4); color: var(--on-hot); padding: 4px 16px 6px; }
 .tr-scale { display: flex; height: 10px; border-radius: var(--radius-pill); overflow: hidden; width: 100%; max-width: 420px; }
 .tr-scale span { flex: 1; }
 .tr-scale .s0 { background: var(--heat-0); } .tr-scale .s1 { background: var(--heat-1); } .tr-scale .s2 { background: var(--heat-2); } .tr-scale .s3 { background: var(--heat-3); } .tr-scale .s4 { background: var(--heat-4); }
@@ -156,6 +164,19 @@ a { color: inherit; }
 @media (max-width: 760px) { .tr-scrim-l::after { background: linear-gradient(180deg, rgba(11, 10, 18, 0.25) 0%, rgba(11, 10, 18, 0.92) 70%); } }
 .tr-credit { font-size: 11px; color: rgba(245, 243, 255, 0.78); }
 .tr-credit a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+/* Texte posé sur une photo : clair la nuit, à l'encre le jour (voile clair) */
+.tr-on-photo { color: #f5f3ff; }
+
+/* Thème day : la photo passe dans #thermal-day (ombres claires au lieu de noires, même échelle de chaleur),
+   voiles clairs, texte, stickers et boutons à l'encre (docs/images.md § 4) */
+[data-theme="day"] .tr-on-photo { color: var(--ink); }
+[data-theme="day"] .tr-photo.thermal img, [data-theme="day"] .tr-photo.thermal .ph-bg { filter: url(#thermal-day); }
+[data-theme="day"] .tr-photo.cooled img { filter: grayscale(1) brightness(1.2) contrast(0.8); }
+[data-theme="day"] .tr-photo.cooled .ph-bg { filter: grayscale(1) brightness(1.2); }
+[data-theme="day"] .tr-scrim-b::after { background: linear-gradient(180deg, rgba(247, 245, 251, 0) 30%, rgba(247, 245, 251, 0.9) 100%); }
+[data-theme="day"] .tr-scrim-l::after { background: linear-gradient(90deg, rgba(247, 245, 251, 0.94) 0%, rgba(247, 245, 251, 0.74) 45%, rgba(247, 245, 251, 0.08) 100%); }
+@media (max-width: 760px) { [data-theme="day"] .tr-scrim-l::after { background: linear-gradient(180deg, rgba(247, 245, 251, 0.2) 0%, rgba(247, 245, 251, 0.92) 70%); } }
+[data-theme="day"] .tr-credit { color: var(--ink); background: rgba(247, 245, 251, 0.8); padding: 2px 6px; border-radius: 6px; }
 
 /* Story card — one trend, 9:16, like a phone screen */
 .tr-story { position: relative; width: 270px; aspect-ratio: 9 / 16; max-width: 100%; border-radius: var(--radius-lg); background: var(--surface); overflow: hidden; box-shadow: var(--lift); isolation: isolate; display: block; text-decoration: none; color: var(--ink); }
@@ -167,6 +188,10 @@ a { color: inherit; }
 .tr-bars i { flex: 1; height: 3px; border-radius: 2px; background: #f5f3ff; opacity: 0.35; }
 .tr-bars i.on { opacity: 1; }
 .tr-story-head { display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 700; color: #f5f3ff; gap: 6px; }
+.tr-story-head .tr-example { color: inherit; }
+[data-theme="day"] .tr-story > .tr-story-photo::after { background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0) 55%, var(--surface) 100%); }
+[data-theme="day"] .tr-story-head { color: var(--ink); }
+[data-theme="day"] .tr-bars i { background: var(--ink); }
 .tr-story-title { margin: auto 0 0; font-family: var(--font-display); font-stretch: 62%; font-weight: 800; font-size: 56px; line-height: 0.9; text-transform: lowercase; color: var(--ink); text-wrap: balance; overflow-wrap: anywhere; }
 .tr-story-why { margin: 0; font-size: 13px; line-height: 18px; color: var(--ink); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .tr-story-meta { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
@@ -182,6 +207,8 @@ a { color: inherit; }
 .tr-sticker.caution { background: var(--caution); color: var(--on-hot); }
 .tr-sticker.on-photo { background: #f5f3ff; color: #0b0a12; }
 .tr-sticker.on-photo.ghost { background: rgba(11, 10, 18, 0.35); color: #f5f3ff; box-shadow: inset 0 0 0 1.5px #f5f3ff; }
+[data-theme="day"] .tr-sticker.on-photo { background: var(--ink); color: var(--night); }
+[data-theme="day"] .tr-sticker.on-photo.ghost { background: rgba(247, 245, 251, 0.6); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--ink); }
 .tr-sticker svg { width: 14px; height: 14px; }
 
 /* Rows — the chart list, like a music chart */
@@ -212,7 +239,7 @@ a { color: inherit; }
 .tr-day.best b { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
 
 /* Ticker */
-.tr-ticker { display: flex; align-items: center; gap: var(--space-3); background: var(--surface); border-block: 1px solid var(--line); overflow: hidden; height: 36px; }
+.tr-ticker { display: flex; align-items: center; gap: var(--space-3); background: var(--surface); border-block: 1px solid var(--line); overflow: hidden; height: var(--ticker-h); box-sizing: border-box; }
 .tr-live { flex: none; display: inline-flex; align-items: center; gap: 6px; height: 100%; padding: 0 var(--space-3); background: var(--heat-4); color: var(--on-hot); font-size: 11px; font-weight: 800; letter-spacing: 0.08em; }
 .tr-live::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--on-hot); animation: tr-pulse 1.4s ease-in-out infinite; }
 .tr-track { display: flex; gap: 28px; white-space: nowrap; font-size: 12px; animation: tr-scroll 40s linear infinite; font-variant-numeric: tabular-nums; }
@@ -228,6 +255,7 @@ a { color: inherit; }
 .tr-btn.ink { background: var(--ink); color: var(--night); }
 .tr-btn.line { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
 .tr-btn.line.on-photo { color: #f5f3ff; box-shadow: inset 0 0 0 1.5px rgba(245, 243, 255, 0.6); }
+[data-theme="day"] .tr-btn.line.on-photo { color: var(--ink); box-shadow: inset 0 0 0 1.5px rgba(18, 15, 30, 0.4); }
 .tr-btn.small { min-height: 36px; padding: 8px 14px; font-size: 13px; }
 .tr-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 .tr-btn svg { width: 16px; height: 16px; }
@@ -273,7 +301,20 @@ a { color: inherit; }
 .tr-status-dot.pulse { animation: tr-status-pulse 1.6s ease-in-out infinite; }
 @keyframes tr-status-pulse { 50% { opacity: 0.25; } }
 
+/* Héros de l'accueil : remplit l'écran sous le ticker et l'en-tête, tout visible sans défiler.
+   Le titre suit aussi la hauteur de l'écran (svh : barres du navigateur mobile affichées). */
+.tr-hero-screen { min-height: calc(100svh - var(--ticker-h) - var(--header-h)); }
+.tr-hero-title { font-size: clamp(64px, min(18vw, 15svh), 220px); line-height: 0.82; }
+
+/* Défilement magnétique de l'accueil : le haut de page, puis chaque section calée au centre de l'écran.
+   « proximity » : ne cale que près d'une section ; une section plus haute que l'écran se lit librement. */
+html:has(.tr-snap) { scroll-snap-type: y proximity; }
+.tr-snap { scroll-snap-align: center; }
+.tr-snap-top { scroll-snap-align: start; scroll-margin-top: calc(var(--ticker-h) + var(--header-h)); }
+html:has(.tr-snap) footer { scroll-snap-align: end; }
+
 @media (prefers-reduced-motion: reduce) {
   .tr-track, .tr-live::before, .tr-enter, .tr-status-dot.pulse { animation: none; }
   * { scroll-behavior: auto !important; }
+  html:has(.tr-snap) { scroll-snap-type: none; }
 }

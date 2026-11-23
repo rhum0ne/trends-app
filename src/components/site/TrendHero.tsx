@@ -26,9 +26,10 @@ export function TrendHero({ trend, trackedCountries, stale, label = "Right now Â
   const firstIn = trend.countries.filter((c) => c.rank === 1).length;
   const hottest = trend.countries.slice(0, 8);
   return (
-    <section className="relative isolate overflow-hidden" aria-labelledby="hero-title">
+    <section className="tr-snap-top tr-hero-screen relative isolate flex flex-col overflow-hidden" aria-labelledby="hero-title">
       <ThermalImage image={trend.image} alt={trend.title} category={trend.category} className="absolute inset-0 -z-10" scrim="l" priority credit sizes="100vw" />
-      <div className="tr-wrap flex min-h-[560px] flex-col justify-end gap-5 py-12 md:min-h-[640px]" style={{ color: "#f5f3ff" }}>
+      {/* Remplit l'Ã©cran (tr-hero-screen) ; marges et Ã©carts suivent la hauteur pour tenir sur un Ã©cran bas */}
+      <div className="tr-wrap tr-on-photo flex flex-1 flex-col justify-end gap-3 py-5 sm:gap-[clamp(10px,2.2svh,20px)] sm:py-[clamp(20px,5svh,48px)]">
         <p className="m-0 text-sm font-bold tracking-wide uppercase">
           {label}
           {stale && trend.updated_at ? <span className="ml-2 font-normal normal-case opacity-80">Updated {formatDay(trend.day)}</span> : null}
@@ -38,10 +39,10 @@ export function TrendHero({ trend, trackedCountries, stale, label = "Right now Â
           <SafetySticker brandSafe={trend.brand_safe} />
           <HeatwaveSticker days={trend.heatwave_days} onPhoto />
         </div>
-        <h1 id="hero-title" className="tr-display m-0 max-w-5xl" style={{ fontSize: "clamp(96px, 16vw, 220px)", lineHeight: 0.82 }}>
+        <h1 id="hero-title" className="tr-display tr-hero-title m-0 max-w-5xl">
           {trend.title}
         </h1>
-        <p className="m-0 max-w-2xl text-lg leading-snug">{trend.why}</p>
+        <p className="m-0 max-w-2xl text-base leading-snug sm:text-lg">{trend.why}</p>
         <div className="flex flex-wrap items-end gap-x-8 gap-y-3">
           <HeatBadge heat={trend.heat} size="xl" />
           <div className="flex flex-col gap-2 pb-2">

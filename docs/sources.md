@@ -2,7 +2,7 @@
 
 Une ligne par source, remplie **après lecture de la page officielle** : rien n'est affirmé sans lien et sans date de lecture. Une source sans ligne remplie n'est pas activée en production.
 
-**État au 2026-11-22** : seule la licence des drapeaux a été lue (fichier `LICENSE` du paquet installé). Toutes les autres lignes restent **à lire par l'humain** ; les liens indiqués sont les pages officielles probables, à confirmer en les ouvrant.
+**État au 2026-11-23** : seules la licence des drapeaux (fichier `LICENSE` du paquet installé) et celle d'Archivo (`OFL.txt` du dépôt google/fonts) ont été lues. Toutes les autres lignes restent **à lire par l'humain** ; les liens indiqués sont les pages officielles probables, à confirmer en les ouvrant.
 
 | Source | Usage dans trends° | Conditions (lien) | Lue le | Ce qui est permis / obligatoire | Statut |
 | --- | --- | --- | --- | --- | --- |
@@ -13,5 +13,5 @@ Une ligne par source, remplie **après lecture de la page officielle** : rien n'
 | Claude, outil de recherche web | Analyse quotidienne | https://platform.claude.com/docs/en/agents-and-tools/tool-use/web-search-tool | — | afficher les sources des résultats (fait : section « signals » et champ `sources`) | à lire |
 | Pexels API | Photos des tendances | https://www.pexels.com/api/documentation/ ; licence : https://www.pexels.com/license/ | — | à remplir (crédit, limites 200/h et 20 000/mois par défaut) | à lire |
 | Drapeaux (`flag-icons` 7.6.0) | Composant `Flag` | Licence MIT, fichier `LICENSE` du paquet npm `flag-icons` (© 2013 Panayiotis Lipiridis) ; https://github.com/lipis/flag-icons | 2026-11-22 | Usage, copie, modification et usage commercial permis ; garder la mention de copyright et de licence dans les copies (copiée dans `public/flags/LICENSE` par `scripts/copy-flags.mjs`) | lu |
-| Archivo (Google Fonts) | Police unique, chargée par `next/font` et pour les images Open Graph | https://fonts.google.com/specimen/Archivo/license (SIL Open Font License 1.1, à confirmer) | — | à remplir | à lire |
+| Archivo (Google Fonts) | Police unique, chargée par `next/font` et pour les images Open Graph ; glyphe « t » de l'icône (`pnpm build:icon`, police variable téléchargée au commit `95f4904` de google/fonts, empreinte vérifiée) | SIL Open Font License 1.1, fichier `OFL.txt` : https://github.com/google/fonts/blob/95f4904fc8bcf26d3420fe315560c96417c6dec7/ofl/archivo/OFL.txt (© 2020 The Archivo Project Authors) | 2026-11-23 | Usage, copie, modification, intégration et redistribution permis, y compris commercial ; la police ne se vend pas seule ; toute copie de la police garde la licence. Aucun « Reserved Font Name » déclaré. Les images produites avec la police (icône, images OG) ne sont pas des copies de la police. La police n'est pas commitée (cache dans `node_modules/.cache`) | lu |
 | Resend (facultatif) | Email d'alerte admin | https://resend.com/legal/terms-of-service | — | service d'envoi, pas une source de données ; choix du fournisseur à confirmer | à décider |

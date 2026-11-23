@@ -177,6 +177,7 @@ Direction artistique complète : `docs/design.md`. Les règles qui ne se discute
 - Carte story 9:16, stickers inclinés, ticker LIVE, classement façon hit-parade, prévision sur 5 jours, tuiles pays colorées par leur chaleur avec drapeau.
 - Vocabulaire météo (heat, heating up, cooling, heatwave, forecast). Jamais « viral », jamais d'emoji.
 - Tout chiffre d'exemple porte « Example ». Mouvement réduit avec `prefers-reduced-motion`. Contraste 4,5:1 au moins.
+- **Icône « t° »** : générée par `pnpm build:icon` (glyphe Archivo + anneau `heat-4`, `docs/design.md`), jamais retouchée à la main ; les fichiers produits sont commités.
 
 ## 11. Commandes
 
@@ -188,6 +189,7 @@ pnpm lint
 pnpm typecheck
 pnpm run:daily    # lance le pipeline une fois en local (sources réelles, IA et Pexels si les clés sont là)
 pnpm db:types     # régénère les types Supabase
+pnpm build:icon   # régénère l'icône t° (src/app/icon.svg, favicon.ico, apple-icon.png, public/icon-*.png, og-avatar.png)
 pnpm db:migrate   # applique les migrations en attente (DATABASE_URL) ; en production, fait au démarrage du conteneur
 ```
 

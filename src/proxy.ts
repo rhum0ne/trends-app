@@ -18,5 +18,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/|flags/|favicon.ico|icon|apple-icon).*)"],
+  // Icônes (`pnpm build:icon`) et manifeste servis même en phase 0 : onglet, écran d'accueil, avatar.
+  matcher: ["/((?!_next/|flags/|favicon.ico|icon|apple-icon|manifest.webmanifest|og-avatar.png).*)"],
 };

@@ -14,7 +14,8 @@
     "bq:schema": "tsx --env-file-if-exists=.env.local scripts/bq-schema.ts",
     "db:types": "tsx --env-file-if-exists=.env.local scripts/gen-types.ts",
     "postinstall": "node scripts/copy-flags.mjs",
-    "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate.mjs"
+    "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate.mjs",
+    "build:icon": "tsx scripts/build-icon.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^1.12.0",
@@ -32,12 +33,14 @@
   },
   "devDependencies": {
     "@tailwindcss/turbopack": "4.3.3",
+    "@types/fontkit": "^2.0.9",
     "@types/node": "^24.19.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@vitejs/plugin-react": "^6.3.0",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "fontkit": "^3.0.0",
     "postgres": "4.1.1",
     "supabase": "^3.2.0",
     "tailwindcss": "4.3.3",

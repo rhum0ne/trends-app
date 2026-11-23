@@ -45,6 +45,7 @@ Les vérifications humaines sont dans `CHECKLIST.md`.
 - [x] `/`, `/t/{slug}`, `/c`, `/c/{code}`, `/archive`, `/api`, en-tête, pied de page, thème, Shuffle, sélection de pays
 - [x] Carte story partageable (`next/og`), images Open Graph, sitemap, IndexNow, `noindex`
 - [x] Page d'attente quand `PUBLIC_SITE=false`
+- [x] Icône « t° » générée par `pnpm build:icon` (glyphe Archivo wdth 62 / wght 800 → `<path>`, anneau `heat-4`) : `icon.svg`, `favicon.ico`, `apple-icon.png`, icônes PWA, `og-avatar.png`, `manifest.ts`, section du `/styleguide`
 
 ## Étape 9 — Administration
 - [x] `/admin` (lien magique, `ADMIN_EMAILS`) : analyse, Hide, Make top, Next photo, Remove photo, Run now, signalements, clés, liste d'attente

@@ -56,6 +56,13 @@ Maquettes validées par l'humain (pour lui, l'agent n'y a pas accès) : canevas 
 - Dans `bundle.css`, `--font-display`, `--font-body` et `--font-data` pointent tous vers Archivo.
 - Échelle : titre de la tendance du jour `clamp(120px, 16vw, 220px)` ; titres de section 40–44 ; titre de carte story 56 ; degrés en grand 64 ; texte 15–19 ; petits textes 12–13.
 
+## Icône « t° »
+
+- Un « t » minuscule en Archivo condensé (wdth 62, 800, `ink`) et un anneau `heat-4` en exposant, comme le ° du logo, sur un carré `night`. Seul autre usage de l'échelle thermique hors chaleur.
+- Générée par `pnpm build:icon` (`scripts/build-icon.ts`, géométrie dans `src/lib/brand/icon.ts`, testée) : le glyphe est converti en `<path>`, jamais en `<text>` ; couleurs lues dans `tokens.json`.
+- Anneau : diamètre extérieur 0,45 × la hauteur du t, haut aligné sur le haut du t, trait 0,72 × le fût (à 1 × le trou se bouche). Variante `small` pour 16 et 32 px : 0,56 × la hauteur, trait 0,8 × le fût, écart plus large ; `icon.svg` la choisit seul sous 40 px (media query), les PNG 16/32/48 ont le fût calé sur la grille de pixels.
+- Le groupe occupe 62 % du côté, centré sur sa boîte, un peu plus bas (1,2 %). Coins arrondis 22,5 % pour `icon.svg`, `favicon.ico` et les icônes PWA ; plein cadre pour `apple-icon.png`, l'icône `maskable` (tout dans le cercle de 80 %) et `og-avatar.png`.
+
 ## Images : de vraies photos, en thermique
 
 - Chaque tendance a **une vraie photo** (Pexels), choisie automatiquement à partir de mots-clés visuels, copiée dans notre stockage, puis affichée avec le **filtre thermique** (gradient map noir → `heat-0` → … → `heat-4`). Détail : `docs/images.md`.

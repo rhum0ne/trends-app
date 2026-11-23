@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Suspense } from "react";
+import Image from "next/image";
 import { ArrowRight, Shuffle } from "lucide-react";
 import { HeatBadge, HeatScale } from "@/components/HeatBadge";
 import { ThermalImage } from "@/components/ThermalImage";
@@ -26,6 +27,14 @@ export const metadata: Metadata = {
   title: "Styleguide · trends°",
   robots: { index: false, follow: false },
 };
+
+// Icônes PNG produites par `pnpm build:icon`, avec le masque qu'applique chaque système.
+const ICON_EXPORTS = [
+  { src: "/icon-192.png", label: "PWA 192", mask: "" },
+  { src: "/apple-icon.png", label: "Apple 180 (iOS mask)", mask: "rounded-[22.5%]" },
+  { src: "/icon-maskable-512.png", label: "Maskable (circle)", mask: "rounded-full" },
+  { src: "/og-avatar.png", label: "Avatar 400 (circle)", mask: "rounded-full" },
+];
 
 function Pair({ title, note, children }: { title: string; note?: string; children: ReactNode }) {
   return (
@@ -72,7 +81,23 @@ async function Gallery() {
         <PoweredBy />
       </Pair>
 
-      <Pair title="ticker" note="Ticker · LIVE strip at the top of every page">
+      <Pair title="icon" note="t° · pnpm build:icon · 512, 64, 32, 16 px (small ring at 32 and 16)">
+        <div className="flex w-full flex-wrap items-end gap-4">
+          {[512, 64, 32, 16].map((px) => (
+            <Image key={px} src="/icon.svg" width={px} height={px} unoptimized alt={`trends° icon, ${px} px`} className="h-auto max-w-full" />
+          ))}
+        </div>
+        <div className="flex w-full flex-wrap items-end gap-4">
+          {ICON_EXPORTS.map((e) => (
+            <span key={e.src} className="flex flex-col items-start gap-1">
+              <Image src={e.src} width={64} height={64} unoptimized alt={e.label} className={e.mask} />
+              <span className="tr-muted text-xs">{e.label}</span>
+            </span>
+          ))}
+        </div>
+      </Pair>
+
+      <Pair title="ticker"note="Ticker · LIVE strip at the top of every page">
         <div className="w-full">
           <Ticker items={trends.map((t) => ({ slug: t.slug, title: t.title, heat: t.heat, heat_change: t.heat_change }))} />
         </div>

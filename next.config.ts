@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { HTML_LIMITED_BOTS } from "./src/lib/seo/bots";
 
 const nextConfig: NextConfig = {
   // Image Docker autonome (CLAUDE.md § 4, docs/deploy.md)
@@ -6,6 +7,13 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   poweredByHeader: false,
+  // Moteurs et robots d'IA : métadonnées dans le <head>, contenu sans streaming (src/lib/seo/bots.ts)
+  htmlLimitedBots: HTML_LIMITED_BOTS,
+  // Fichier de clé IndexNow à la racine (/{clé}.txt) : une clé dans un sous-dossier limiterait les URL
+  // acceptées à ce sous-dossier. La route ne répond que si la clé demandée est INDEXNOW_KEY.
+  async rewrites() {
+    return [{ source: "/:key([0-9a-fA-F-]{8,128}).txt", destination: "/api/indexnow-key?key=:key" }];
+  },
   serverExternalPackages: ["@google-cloud/bigquery", "sharp"],
   images: {
     // Les photos sont copiées dans Supabase Storage (docs/images.md) : jamais servies depuis Pexels.

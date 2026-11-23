@@ -61,3 +61,6 @@ Documentation de `v1` (points d'accès, champs, limites, exemples), formulaire �
 - Chaque page a son image Open Graph générée (la carte story de la tendance, 1200×630 et 1080×1920).
 - Titres de page : « {title} is heating up · trends° » (60 caractères au plus).
 - Le script de mesure d'upTake est installé sur le site (lien suivi `?ut=trends` vers upTake).
+- **Données structurées** (`src/lib/seo/jsonld.ts`, composant `JsonLd`) : `Organization` (trends°, rattachée à upTake) et `WebSite` sur toutes les pages publiques ; `Article` (titre, `why`, dates de première apparition et de mise à jour, catégorie, photo créditée, sources en `citation`) et `BreadcrumbList` sur `/t/{slug}` ; `ItemList` des tendances sur l'accueil et `/archive`. Jamais de note, d'avis ni de chiffre absent de la page.
+- **Robots d'IA** : `htmlLimitedBots` (`src/lib/seo/bots.ts`) leur sert, comme à Bingbot, les métadonnées dans le `<head>` et la page sans streaming ; ils n'exécutent pas le JavaScript.
+- **IndexNow** : fichier de clé à la racine (`/{INDEXNOW_KEY}.txt`, réécrit vers `/api/indexnow-key`), sinon IndexNow refuse les URL hors du dossier de la clé.

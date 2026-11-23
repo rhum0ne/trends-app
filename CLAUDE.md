@@ -154,6 +154,7 @@ Fonctionnement détaillé : `docs/pages.md`. L'essentiel :
 - Chaque angle de post a « Copy » et « Write it in upTake » (lien suivi du § 2). Bouton « Report this trend ».
 - Sitemap avec la vraie date de la dernière analyse, jamais la date du build. IndexNow pour les pages nouvelles ou modifiées. Pas de données structurées trompeuses, pas de texte caché.
 - Liens sortants vers les sources : `rel="noopener"`, jamais `nofollow`.
+- JSON-LD seulement via `src/lib/seo/jsonld.ts`, fidèle à ce que la page montre. Robots d'IA dans `htmlLimitedBots` (`src/lib/seo/bots.ts`) : métadonnées dans le `<head>` pour eux.
 
 ## 9. Sécurité, droits et interdits
 

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { headers } from "next/headers";
@@ -16,6 +17,10 @@ import { EmptyForecast } from "@/components/site/EmptyForecast";
 import { CATEGORY_LABEL, countryName } from "@/lib/format";
 import { SITE_URL } from "@/lib/links";
 import type { TrendView } from "@/lib/types";
+import { JsonLd } from "@/components/JsonLd";
+import { trendListJsonLd } from "@/lib/seo/jsonld";
+
+export const metadata: Metadata = { alternates: { canonical: "/" } };
 
 function Section({ id, title, children, aside }: { id?: string; title: string; children: React.ReactNode; aside?: React.ReactNode }) {
   return (
@@ -71,6 +76,7 @@ async function HomeContent() {
 
   return (
     <>
+      <JsonLd data={trendListJsonLd(`Today's trends, ${day}`, [top, ...others])} />
       <TrendHero trend={top} trackedCountries={tracked} stale={stale} />
 
       <section className="tr-wrap tr-snap grid gap-6 py-8 md:grid-cols-[1.2fr_1fr]" aria-label="Forecast">

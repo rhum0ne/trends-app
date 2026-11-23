@@ -20,6 +20,8 @@ import { CATEGORY_LABEL, countryName, coolsInLabel, formatDay, pageTitle } from 
 import { heatVar } from "@/lib/heat/levels";
 import { GOOGLE_TRENDS_URL, SITE_URL } from "@/lib/links";
 import type { TrendView } from "@/lib/types";
+import { JsonLd } from "@/components/JsonLd";
+import { trendJsonLd } from "@/lib/seo/jsonld";
 
 export async function generateMetadata({ params }: PageProps<"/t/[slug]">): Promise<Metadata> {
   const { slug } = await params;
@@ -118,6 +120,7 @@ async function TrendContent({ slug }: { slug: string }) {
 
   return (
     <>
+      <JsonLd data={trendJsonLd(trend)} />
       <nav aria-label="Breadcrumb" className="tr-wrap py-3 text-sm">
         <ol className="tr-muted m-0 flex list-none flex-wrap gap-2 p-0">
           <li>

@@ -14,7 +14,8 @@ Ce que l'agent ne peut pas faire (comptes, clés, lectures de conditions, décis
 - [ ] Clé Anthropic dédiée à trends° (`ANTHROPIC_API_KEY`), recherche web autorisée dans la Console, limite mensuelle dans la Console en plus de `AI_DAILY_BUDGET_USD`
 - [ ] Clé Pexels (`PEXELS_API_KEY`)
 - [ ] `CRON_SECRET` (`openssl rand -hex 32`)
-- [ ] Facultatif : `RESEND_API_KEY` + `ALERT_FROM` (alertes), `INDEXNOW_KEY`, `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_UPTAKE_SCRIPT_SRC`
+- [ ] `INDEXNOW_KEY` dans Coolify (`openssl rand -hex 16`) ; après déploiement, `https://trends.uptake.me/{clé}.txt` renvoie la clé
+- [ ] Facultatif : `RESEND_API_KEY` + `ALERT_FROM` (alertes), `NEXT_PUBLIC_POSTHOG_KEY`, `NEXT_PUBLIC_UPTAKE_SCRIPT_SRC`
 
 ## Conditions des sources (`docs/sources.md`) — à lire et dater avant la production
 - [ ] Google Trends sur BigQuery (fiche Marketplace, attribution, usage commercial)
@@ -27,6 +28,8 @@ Ce que l'agent ne peut pas faire (comptes, clés, lectures de conditions, décis
 - [x] `flag-icons` : MIT, lu le 2026-11-22
 
 ## Décisions à prendre
+- [ ] `noindex` d'une tendance avant 2 jours (`docs/pages.md`) : une tendance « 1-2 days » risque de n'être indexée qu'une fois refroidie. Garder ou indexer dès le premier jour ?
+- [ ] Robots d'entraînement d'IA (GPTBot, CCBot, Google-Extended…) : autorisés aujourd'hui comme les autres. L'analyse étant le produit, n'autoriser que les robots de recherche (OAI-SearchBot, Claude-SearchBot, PerplexityBot) ?
 - [ ] Fournisseur d'email pour les alertes (Resend codé par défaut, ou autre)
 - [ ] Liste de mots bloqués (`src/lib/blocklist.ts`) : volontairement large (« dead », « army », « temple », « crash »…), à ajuster après les premières relectures
 - [ ] Modèle de l'analyse : `claude-opus-5-5` par défaut ; surveiller le coût réel dans `/admin` (budget 2 $/jour)
@@ -45,6 +48,11 @@ Ce que l'agent ne peut pas faire (comptes, clés, lectures de conditions, décis
 - [ ] Mémoire VPS vérifiée avec upTake actif ; services Supabase optionnels désactivés (noter lesquels) : __________
 - [ ] Vérification finale `/api/health` (`db: true`), photo Storage, exécution daily dans `cron_runs`, upTake intact
 - [ ] Clé interne « upTake production » créée dans `/admin`, donnée à upTake avec `docs/uptake-integration.md`
+
+## Référencement (après déploiement)
+- [ ] Rich Results Test / validateur schema.org sur `/` et une page `/t/{slug}` : `Article`, `BreadcrumbList`, `ItemList` sans erreur
+- [ ] `curl -A GPTBot https://trends.uptake.me/t/{slug}` : `<title>`, canonical et JSON-LD présents, `<title>` avant `</head>`
+- [ ] Google Search Console et Bing Webmaster Tools : site vérifié, sitemap envoyé
 
 ## Vérifications après le premier lancement réel (`pnpm run:daily` avec les clés)
 - [ ] Au moins 5 tendances analysées, sûres, avec chaleur, pays, prévision et photo

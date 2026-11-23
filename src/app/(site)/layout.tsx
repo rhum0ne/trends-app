@@ -3,6 +3,8 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { SiteTicker } from "@/components/site/SiteTicker";
 import { Ticker } from "@/components/Ticker";
+import { JsonLd } from "@/components/JsonLd";
+import { siteJsonLd } from "@/lib/seo/jsonld";
 
 export default function SiteLayout({ children }: LayoutProps<"/">) {
   return (
@@ -18,6 +20,7 @@ export default function SiteLayout({ children }: LayoutProps<"/">) {
         {children}
       </main>
       <Footer />
+      <JsonLd data={siteJsonLd()} />
     </>
   );
 }

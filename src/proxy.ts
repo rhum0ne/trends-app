@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 // Phase 0 (PUBLIC_SITE=false) : le site public n'affiche que la page d'attente ; l'API, l'admin,
 // les tâches planifiées et /styleguide (noindex) restent accessibles. Lu à l'exécution, pas au build.
-const ALWAYS_OPEN = [/^\/api\//, /^\/admin(\/|$)/, /^\/auth\//, /^\/styleguide$/, /^\/coming-soon$/, /^\/robots\.txt$/];
+const ALWAYS_OPEN = [/^\/api\//, /^\/admin(\/|$)/, /^\/auth\//, /^\/styleguide(\/admin)?$/, /^\/coming-soon$/, /^\/robots\.txt$/];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

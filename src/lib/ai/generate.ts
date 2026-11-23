@@ -59,7 +59,7 @@ export interface GenerateResult<T> {
 }
 
 const BETAS = ["server-side-fallback-2026-07-01"];
-const MAX_SEARCHES = 8;
+export const MAX_SEARCHES = 8;
 
 let client: Anthropic | null = null;
 function anthropic(): Anthropic {

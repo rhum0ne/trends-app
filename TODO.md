@@ -49,6 +49,8 @@ Les vérifications humaines sont dans `CHECKLIST.md`.
 
 ## Étape 9 — Administration
 - [x] `/admin` (lien magique, `ADMIN_EMAILS`) : analyse, Hide, Make top, Next photo, Remove photo, Run now, signalements, clés, liste d'attente
+- [x] Écran admin revu : vue `AdminDashboard` séparée de la lecture en base, aperçu avec données d'exemple sur `/styleguide/admin` ; page de connexion en carte centrée ; raison d'un lien magique non envoyé dans les journaux du serveur
+- [ ] `.tr-wrap`, `.tr-status-dot` (et les autres classes `tr-*` hors `@layer`) l'emportent sur les utilitaires Tailwind (`max-w-*`, `bg-*`) : les passer dans `@layer components` quand on retouchera `globals.css`
 
 ## Étape 10 — Tâches planifiées et mise en service
 - [x] `/api/cron/daily`, `/api/cron/hourly`, `cron_runs`, ligne cron dans `docs/deploy.md`

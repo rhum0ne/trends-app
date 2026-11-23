@@ -53,6 +53,7 @@ Ce que l'agent ne peut pas faire (comptes, clés, lectures de conditions, décis
 - [ ] Coût de l'analyse dans `/admin` (sous 2 $)
 - [ ] `/` et `/t/{slug}` avec `PUBLIC_SITE=true` en local : rendu réel, téléphone (360 px) et ordinateur, thèmes night et day
 - [ ] `/styleguide` : valider le rendu de chaque composant
+- [ ] `/styleguide/admin` puis `/admin` connecté : valider le nouvel écran d'administration (night, day, téléphone)
 - [ ] Vérifier l'icône dans un onglet Chrome, sur l'écran d'accueil iOS et sur Android
 - [ ] Carte partageable `/t/{slug}/card` et image Open Graph : police Archivo largeur normale (limite de `next/og`), à valider
 - [ ] Contraste 4,5:1 sur les photos réelles (texte sur dégradé sombre)

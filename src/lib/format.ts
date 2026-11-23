@@ -80,3 +80,17 @@ export const CATEGORY_LABEL: Record<string, string> = {
 export function parisToday(now: Date = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
 }
+
+/** Date et heure à Paris, pour l'administration : « 23 Nov, 06:30 ». */
+export function parisDateTime(iso: string): string {
+  return new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Paris", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(iso));
+}
+
+/** Durée entre deux instants : « 42 s », « 3 min », « 1 h 05 » ; null si non terminé. */
+export function durationLabel(startIso: string, endIso: string | null): string | null {
+  if (!endIso) return null;
+  const s = Math.max(0, Math.round((Date.parse(endIso) - Date.parse(startIso)) / 1000));
+  if (s < 60) return `${s} s`;
+  if (s < 3600) return `${Math.round(s / 60)} min`;
+  return `${Math.floor(s / 3600)} h ${String(Math.round((s % 3600) / 60)).padStart(2, "0")}`;
+}

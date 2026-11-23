@@ -1,34 +1,65 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { AlertTriangle, Mail } from "lucide-react";
 import { Logo } from "@/components/Logo";
+import { Sticker } from "@/components/Sticker";
 import { sendMagicLink } from "../actions";
 
 export const metadata: Metadata = { title: "Admin · trends°", robots: { index: false, follow: false } };
 
 async function Message({ searchParams }: { searchParams: PageProps<"/admin/login">["searchParams"] }) {
   const sp = await searchParams;
-  if (sp.sent) return <p className="m-0 font-bold" role="status">If this address is allowed, a sign-in link is on its way.</p>;
-  if (sp.error) return <p className="m-0 text-caution" role="alert">That link didn&apos;t work. Ask for a new one.</p>;
+  if (sp.sent) {
+    return (
+      <div className="flex items-start gap-3 rounded-[14px] bg-surface-2 p-4 text-sm" role="status">
+        <Mail strokeWidth={1.75} className="mt-[2px] size-4 shrink-0" aria-hidden="true" />
+        <div className="flex flex-col gap-1">
+          <b>If this address is allowed, a sign-in link is on its way.</b>
+          <span className="tr-muted">Check your spam folder too. The link works once.</span>
+        </div>
+      </div>
+    );
+  }
+  if (sp.error) {
+    return (
+      <div className="flex items-start gap-3 rounded-[14px] bg-surface-2 p-4 text-sm" role="alert">
+        <AlertTriangle strokeWidth={1.75} className="mt-[2px] size-4 shrink-0 text-caution" aria-hidden="true" />
+        <b>That link didn&apos;t work. Ask for a new one.</b>
+      </div>
+    );
+  }
   return null;
 }
 
 export default function AdminLogin({ searchParams }: PageProps<"/admin/login">) {
   return (
-    <main className="tr-wrap flex min-h-dvh max-w-md flex-col justify-center gap-6">
-      <Logo href={null} size={48} />
-      <h1 className="tr-display m-0 text-[56px]">admin</h1>
-      <form action={sendMagicLink} className="flex flex-col gap-3">
-        <label className="flex flex-col gap-1 text-sm font-bold">
-          Email
-          <input type="email" name="email" required autoComplete="email" className="rounded-[8px] border border-line bg-surface-2 px-3 py-2 font-normal text-ink" />
-        </label>
-        <button type="submit" className="tr-btn primary self-start">
-          Send me a sign-in link
-        </button>
-      </form>
-      <Suspense fallback={null}>
-        <Message searchParams={searchParams} />
-      </Suspense>
+    <main className="flex min-h-dvh items-center justify-center px-4 py-10">
+      <div className="flex w-full max-w-[400px] flex-col gap-6 rounded-[24px] bg-surface p-8 shadow-[inset_0_0_0_1px_var(--line)] max-sm:p-6">
+        <div className="flex items-center gap-3">
+          <Logo href={null} size={40} />
+          <Sticker variant={["ghost", "flat"]}>Admin</Sticker>
+        </div>
+        <p className="tr-muted m-0 text-[15px] leading-[22px]">Sign in with a one-time link sent to your email.</p>
+        <form action={sendMagicLink} className="flex flex-col gap-4">
+          <label className="flex flex-col gap-2">
+            <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-ink-muted">Email</span>
+            <input
+              type="email"
+              name="email"
+              required
+              autoComplete="email"
+              placeholder="you@example.com"
+              className="min-h-[44px] rounded-[8px] border border-line bg-surface-2 px-3 text-[15px] text-ink placeholder:text-ink-muted"
+            />
+          </label>
+          <button type="submit" className="tr-btn primary w-full">
+            Send me a sign-in link
+          </button>
+        </form>
+        <Suspense fallback={null}>
+          <Message searchParams={searchParams} />
+        </Suspense>
+      </div>
     </main>
   );
 }

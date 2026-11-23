@@ -65,11 +65,13 @@ jobs:
             NEXT_PUBLIC_UPTAKE_SCRIPT_SRC=${{ secrets.NEXT_PUBLIC_UPTAKE_SCRIPT_SRC }}
       - name: Trigger Coolify deploy (if configured)
         env:
-          COOLIFY_WEBHOOK_URL: ${{ secrets.COOLIFY_WEBHOOK_URL }}
+          # Les deux noms de secret sont acceptés
+          COOLIFY_WEBHOOK_URL: ${{ secrets.COOLIFY_WEBHOOK_URL || secrets.COOLIFY_WEBHOOK }}
           COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
         run: |
           if [ -n "$COOLIFY_WEBHOOK_URL" ]; then
             curl -fsS --max-time 30 -H "Authorization: Bearer $COOLIFY_TOKEN" "$COOLIFY_WEBHOOK_URL"
           else
-            echo "COOLIFY_WEBHOOK_URL not set: skipping deploy trigger"
+            # Visible dans le résumé du run, pas seulement dans les journaux
+            echo "::warning title=No deploy::COOLIFY_WEBHOOK_URL secret is not set: the image was built but Coolify was not asked to deploy it"
           fi

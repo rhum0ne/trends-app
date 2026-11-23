@@ -7,7 +7,7 @@ import { updateTag } from "next/cache";
 import { authClient, isAdminEmail, requireAdmin } from "@/lib/supabase/auth";
 import { db } from "@/lib/supabase/server";
 import { SITE_URL } from "@/lib/links";
-import { flags } from "@/lib/env";
+import { adminEmails, flags } from "@/lib/env";
 import { parisToday } from "@/lib/format";
 import { TRENDS_TAG } from "@/lib/trends/queries";
 import { runDaily } from "@/lib/pipeline/daily";
@@ -17,13 +17,26 @@ import { generateApiKey } from "@/lib/api/keys";
 import { assignablePlans, isKeyPlan } from "@/lib/plans";
 import { clientIp, limiter } from "@/lib/api/ratelimit";
 
-/** Lien magique : envoyé seulement aux adresses autorisées ; la réponse est la même dans tous les cas. */
+/**
+ * Lien magique : envoyé seulement aux adresses autorisées ; la réponse à l'écran est la même dans tous
+ * les cas. La raison d'un non-envoi va dans les journaux du serveur, sans l'adresse (CLAUDE.md § 9).
+ */
 export async function sendMagicLink(form: FormData) {
   const email = String(form.get("email") ?? "").trim().toLowerCase();
   const ip = clientIp(await headers());
-  if (limiter("magic-link").hit(ip, 5).allowed && isAdminEmail(email)) {
-    const supabase = await authClient();
-    await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: `${SITE_URL}/auth/callback`, shouldCreateUser: true } });
+  if (!limiter("magic-link").hit(ip, 5).allowed) {
+    console.warn("[magic-link] not sent: rate limit reached (5 per IP per day)");
+  } else if (!isAdminEmail(email)) {
+    console.warn(`[magic-link] not sent: address not in ADMIN_EMAILS (${adminEmails().length} address(es) configured)`);
+  } else {
+    try {
+      const supabase = await authClient();
+      const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: `${SITE_URL}/auth/callback`, shouldCreateUser: true } });
+      if (error?.name === "AuthRetryableFetchError") console.error(`[magic-link] Supabase Auth unreachable (check SUPABASE_URL): ${error.message}`);
+      else if (error) console.error(`[magic-link] Supabase Auth refused (${error.status ?? "no status"} ${error.code ?? error.name}): ${error.message}`);
+    } catch (e) {
+      console.error("[magic-link] Supabase Auth unreachable:", e instanceof Error ? e.message : e);
+    }
   }
   redirect("/admin/login?sent=1");
 }

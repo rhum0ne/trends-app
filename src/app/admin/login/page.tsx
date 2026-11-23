@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { AlertTriangle, Mail } from "lucide-react";
-import { Logo } from "@/components/Logo";
-import { Sticker } from "@/components/Sticker";
+import { AuthCard } from "@/components/admin/AuthCard";
 import { sendMagicLink } from "../actions";
 
 export const metadata: Metadata = { title: "Admin · trends°", robots: { index: false, follow: false } };
@@ -33,33 +32,27 @@ async function Message({ searchParams }: { searchParams: PageProps<"/admin/login
 
 export default function AdminLogin({ searchParams }: PageProps<"/admin/login">) {
   return (
-    <main className="flex min-h-dvh items-center justify-center px-4 py-10">
-      <div className="flex w-full max-w-[400px] flex-col gap-6 rounded-[24px] bg-surface p-8 shadow-[inset_0_0_0_1px_var(--line)] max-sm:p-6">
-        <div className="flex items-center gap-3">
-          <Logo href={null} size={40} />
-          <Sticker variant={["ghost", "flat"]}>Admin</Sticker>
-        </div>
-        <p className="tr-muted m-0 text-[15px] leading-[22px]">Sign in with a one-time link sent to your email.</p>
-        <form action={sendMagicLink} className="flex flex-col gap-4">
-          <label className="flex flex-col gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-ink-muted">Email</span>
-            <input
-              type="email"
-              name="email"
-              required
-              autoComplete="email"
-              placeholder="you@example.com"
-              className="min-h-[44px] rounded-[8px] border border-line bg-surface-2 px-3 text-[15px] text-ink placeholder:text-ink-muted"
-            />
-          </label>
-          <button type="submit" className="tr-btn primary w-full">
-            Send me a sign-in link
-          </button>
-        </form>
-        <Suspense fallback={null}>
-          <Message searchParams={searchParams} />
-        </Suspense>
-      </div>
-    </main>
+    <AuthCard>
+      <p className="tr-muted m-0 text-[15px] leading-[22px]">Sign in with a one-time link sent to your email.</p>
+      <form action={sendMagicLink} className="flex flex-col gap-4">
+        <label className="flex flex-col gap-2">
+          <span className="text-[11px] font-bold uppercase tracking-[0.08em] text-ink-muted">Email</span>
+          <input
+            type="email"
+            name="email"
+            required
+            autoComplete="email"
+            placeholder="you@example.com"
+            className="min-h-[44px] rounded-[8px] border border-line bg-surface-2 px-3 text-[15px] text-ink placeholder:text-ink-muted"
+          />
+        </label>
+        <button type="submit" className="tr-btn primary w-full">
+          Send me a sign-in link
+        </button>
+      </form>
+      <Suspense fallback={null}>
+        <Message searchParams={searchParams} />
+      </Suspense>
+    </AuthCard>
   );
 }

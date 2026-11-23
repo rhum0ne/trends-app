@@ -18,6 +18,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Icônes (`pnpm build:icon`) et manifeste servis même en phase 0 : onglet, écran d'accueil, avatar.
-  matcher: ["/((?!_next/|flags/|favicon.ico|icon|apple-icon|manifest.webmanifest|og-avatar.png).*)"],
+  // Icônes (`pnpm build:icon`), manifeste et modèles d'email (lus par Supabase Auth) servis même en phase 0.
+  matcher: ["/((?!_next/|flags/|favicon.ico|icon|apple-icon|manifest.webmanifest|og-avatar.png|email/).*)"],
 };

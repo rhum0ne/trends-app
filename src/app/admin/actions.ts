@@ -45,6 +45,21 @@ export async function sendMagicLink(form: FormData) {
   redirect("/admin/login?sent=1");
 }
 
+/**
+ * Lien reçu par email (/admin/verify/{token}, modèle public/email/sign-in.html) : le jeton n'est vérifié qu'au
+ * clic sur le bouton, pour qu'un antivirus de messagerie qui ouvre le lien ne le consomme pas.
+ */
+export async function verifyMagicLink(form: FormData) {
+  const token = String(form.get("token") ?? "");
+  if (!/^[A-Za-z0-9_-]{16,200}$/.test(token)) redirect("/admin/login?error=1");
+  const supabase = await authClient();
+  const { data, error } = await supabase.auth.verifyOtp({ token_hash: token, type: "email" });
+  if (error) console.error(`[magic-link] verify failed (${error.status ?? "no status"} ${error.code ?? error.name}): ${error.message}`);
+  if (!error && isAdminEmail(data.user?.email)) redirect("/admin");
+  await supabase.auth.signOut();
+  redirect("/admin/login?error=1");
+}
+
 export async function signOut() {
   const supabase = await authClient();
   await supabase.auth.signOut();

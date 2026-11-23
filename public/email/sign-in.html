@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="color-scheme" content="dark light" />
+    <title>Sign in to trends° admin</title>
+  </head>
+  <!-- Modèle Supabase Auth (MAILER_TEMPLATES_MAGIC_LINK et _CONFIRMATION). Couleurs : docs/design/tokens.json. -->
+  <body style="margin:0;padding:0;background:#0b0a12;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0b0a12;">
+      <tr>
+        <td align="center" style="padding:40px 16px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:440px;background:#15131f;border:1px solid #2c2840;border-radius:24px;">
+            <tr>
+              <td style="padding:32px;font-family:Archivo,Arial,Helvetica,sans-serif;color:#f5f3ff;">
+                <p style="margin:0 0 24px;font-size:30px;line-height:1;font-weight:800;letter-spacing:-0.5px;">trends°</p>
+                <p style="margin:0 0 8px;font-size:18px;line-height:24px;font-weight:700;">Your admin sign-in link</p>
+                <p style="margin:0 0 24px;font-size:15px;line-height:22px;color:#a39fbd;">Open it and press “Sign in to admin”. The link works once.</p>
+                <a href="{{ .SiteURL }}/admin/verify/{{ .TokenHash }}" style="display:block;text-align:center;background:#ffd84d;color:#120f1e;font-size:15px;font-weight:800;text-decoration:none;padding:14px 18px;border-radius:999px;">Open the sign-in page</a>
+                <p style="margin:24px 0 0;font-size:13px;line-height:18px;color:#a39fbd;">You didn't ask for this? Ignore this email: nothing happens without a click.</p>
+              </td>
+            </tr>
+          </table>
+          <p style="margin:16px 0 0;font-family:Archivo,Arial,Helvetica,sans-serif;font-size:12px;color:#6e6a85;">trends.uptake.me · Powered by upTake</p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

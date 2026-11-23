@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import { Archivo } from "next/font/google";
 import { ThermalFilterDefs } from "@/components/ThermalImage";
 import { THEME_SCRIPT } from "@/components/ThemeToggle";
@@ -42,7 +43,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ThermalFilterDefs />
         {children}
         <Analytics />
-        <UpTake />
+        {/* usePathname() n'est connu qu'à l'exécution : sous Suspense pour ne pas bloquer le prérendu */}
+        <Suspense fallback={null}>
+          <UpTake />
+        </Suspense>
       </body>
     </html>
   );

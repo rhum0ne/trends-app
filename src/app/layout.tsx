@@ -3,6 +3,7 @@ import { Archivo } from "next/font/google";
 import { ThermalFilterDefs } from "@/components/ThermalImage";
 import { THEME_SCRIPT } from "@/components/ThemeToggle";
 import { Analytics } from "@/components/Analytics";
+import { UpTake } from "@/components/UpTake";
 import { SITE_URL } from "@/lib/links";
 import "./globals.css";
 
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ThermalFilterDefs />
         {children}
         <Analytics />
+        <UpTake />
       </body>
     </html>
   );

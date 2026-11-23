@@ -3,7 +3,7 @@ import { EXAMPLE_TRENDS } from "@/lib/examples";
 import type { TrendView } from "@/lib/types";
 import { listBody, topBody, trendBody, countriesBody } from "./endpoints";
 import { validateTrendsQuery, validateDay, canListCountries } from "./access";
-import { MemoryLimiter, secondsUntilNextUtcDay } from "./ratelimit";
+import { hourWindow, MemoryLimiter, secondsUntilNextUtcDay } from "./ratelimit";
 import { bearerKey, generateApiKey, hashApiKey } from "./keys";
 import { toPublicTrend, finalizeDay } from "@/lib/trends/view";
 import { entitlements } from "@/lib/plans";
@@ -175,6 +175,15 @@ describe("rate limits", () => {
     expect(lim.hit("5.6.7.8", 30, now).allowed).toBe(true);
     expect(lim.hit("1.2.3.4", 30, new Date("2026-11-23T00:00:01Z")).allowed).toBe(true);
     expect(secondsUntilNextUtcDay(now)).toBe(14 * 3600);
+  });
+  it("resets an hourly window on the next UTC hour", () => {
+    const lim = new MemoryLimiter("salt");
+    const t1 = new Date("2026-11-22T10:59:00Z");
+    for (let i = 0; i < 5; i++) expect(lim.hit("1.2.3.4", 5, t1, hourWindow(t1)).allowed).toBe(true);
+    expect(lim.hit("1.2.3.4", 5, t1, hourWindow(t1)).allowed).toBe(false);
+    const t2 = new Date("2026-11-22T11:00:01Z");
+    expect(hourWindow(t2)).toBe("2026-11-22T11");
+    expect(lim.hit("1.2.3.4", 5, t2, hourWindow(t2)).allowed).toBe(true);
   });
   it("matches the documented limits", () => {
     expect(entitlements("anonymous").requests).toEqual({ limit: 30, per: "day" });

@@ -15,7 +15,7 @@ import { trackCron } from "@/lib/pipeline/cron";
 import { nextPhoto as nextPhotoFor, removePhoto as removePhotoFor } from "@/lib/images/store";
 import { generateApiKey } from "@/lib/api/keys";
 import { assignablePlans, isKeyPlan } from "@/lib/plans";
-import { clientIp, limiter } from "@/lib/api/ratelimit";
+import { clientIp, hourWindow, limiter } from "@/lib/api/ratelimit";
 
 /**
  * Lien magique : envoyé seulement aux adresses autorisées ; la réponse à l'écran est la même dans tous
@@ -24,8 +24,12 @@ import { clientIp, limiter } from "@/lib/api/ratelimit";
 export async function sendMagicLink(form: FormData) {
   const email = String(form.get("email") ?? "").trim().toLowerCase();
   const ip = clientIp(await headers());
-  if (!limiter("magic-link").hit(ip, 5).allowed) {
-    console.warn("[magic-link] not sent: rate limit reached (5 per IP per day)");
+  // 5 demandes par heure et 20 par jour et par IP ; une demande refusée par l'heure ne compte pas dans le jour.
+  const now = new Date();
+  const hourOk = limiter("magic-link-hour").hit(ip, 5, now, hourWindow(now)).allowed;
+  const dayOk = hourOk && limiter("magic-link-day").hit(ip, 20, now).allowed;
+  if (!hourOk || !dayOk) {
+    console.warn(`[magic-link] not sent: rate limit reached (${hourOk ? "20 per IP per day" : "5 per IP per hour"})`);
   } else if (!isAdminEmail(email)) {
     console.warn(`[magic-link] not sent: address not in ADMIN_EMAILS (${adminEmails().length} address(es) configured)`);
   } else {

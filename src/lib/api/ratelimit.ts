@@ -22,6 +22,11 @@ export function secondsUntilNextUtcMonth(now = new Date()): number {
   return Math.max(1, Math.ceil((next - now.getTime()) / 1000));
 }
 
+/** Fenêtre d'une heure UTC pour MemoryLimiter.hit (par défaut la fenêtre est le jour UTC). */
+export function hourWindow(now = new Date()): string {
+  return now.toISOString().slice(0, 13);
+}
+
 export function monthPeriod(now = new Date()): string {
   return `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-01`;
 }

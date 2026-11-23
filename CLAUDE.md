@@ -63,7 +63,7 @@ On ne passe à la phase suivante que si les critères de `docs/business-plan.md`
 | Hébergement | VPS, Coolify (Docker), image construite par GitHub Actions à chaque push sur `main` ; même VPS qu'upTake, application séparée |
 | Base et stockage | Supabase auto-hébergé sur le VPS via Coolify (Postgres, Auth, Storage), instance dédiée à trends°, migrations dans `supabase/migrations/` |
 | IA | API Claude via `@anthropic-ai/sdk`, **avec sa propre clé** (`ANTHROPIC_API_KEY`), séparée de celle d'upTake |
-| Tâches planifiées | Routes `/api/cron/*` appelées par un planificateur externe (cron du VPS) avec `CRON_SECRET` ; chaque exécution est tracée en base (`cron_runs`) |
+| Tâches planifiées | Superviseur intégré : le serveur appelle `/api/cron/tick` toutes les 5 min (`src/instrumentation.ts`), qui lance ce qui est dû et rattrape ce qui manque (`src/lib/pipeline/schedule.ts`) ; un bail en base (`claim_lease`) évite les doublons entre conteneurs. Aucun cron externe requis. Chaque exécution est tracée (`cron_runs`) |
 | UI | Tailwind, composants maison repris de `docs/design/bundle.css`, icônes `lucide-react`, **une seule police : Archivo** (`next/font/google`), § 10 |
 | Graphiques | SVG écrit à la main. Pas de bibliothèque de graphiques |
 | Images | Photos Pexels copiées dans Supabase Storage, filtre thermique en SVG (`docs/images.md`) |
@@ -87,7 +87,7 @@ Une tâche `daily` par jour à 06:30 Europe/Paris, plus un rafraîchissement lé
 4. **Sécurité de marque** : liste de mots écartés en dur (`src/lib/blocklist.ts` : décès, attentat, guerre, catastrophe, élection, religion…), en plus du jugement de l'IA. Un sujet bloqué ou jugé à risque n'est **jamais** publié ni servi par l'API.
 5. **Photo** : une recherche Pexels par nouvelle tendance à partir de `image_query`, copie dans le stockage (`docs/images.md`). Une tendance sans photo est publiée quand même.
 6. **Expiration** : chaque tendance a un `expires_at` selon sa durée de vie ; une tendance expirée sort de « today » et reste en archive (« This trend has cooled »).
-7. **Échecs** : analyse en échec → un nouvel essai, puis la journée garde les tendances de la veille encore valides. Deux échecs de suite, ou moins de deux sources qui répondent : alerte à l'administrateur (email), une seule fois par incident.
+7. **Échecs** : analyse en échec → un nouvel essai, puis la journée garde les tendances de la veille encore valides. Deux échecs de suite, ou moins de deux sources qui répondent : alerte à l'administrateur (email), une seule fois par incident. Le superviseur réessaie l'analyse du jour à +15 min, +1 h, +3 h (4 essais par jour au plus) et ouvre l'incident `daily_missing` s'il n'y a toujours pas d'analyse réussie à 09:00.
 
 ## 6. Règles pour l'IA
 

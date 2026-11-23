@@ -10,7 +10,8 @@ export async function trackCron<T>(job: "daily" | "hourly" | "manual", fn: () =>
   try {
     const out = await fn();
     const s = (out as { status?: string } | null)?.status;
-    const status = s === "skipped" ? "skipped" : s === "failed" ? "failed" : "ok";
+    // Un repli (analyse en échec, tendances de la veille gardées) n'est pas une réussite
+    const status = s === "skipped" ? "skipped" : s === "failed" || s === "fallback" ? "failed" : "ok";
     if (id) await client.from("cron_runs").update({ finished_at: new Date().toISOString(), status, detail: summarize(out) }).eq("id", id);
     return out;
   } catch (e) {

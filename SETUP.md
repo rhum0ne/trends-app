@@ -64,7 +64,7 @@ Chez le registrar de `uptake.me` : enregistrement `A` (ou `CNAME`) `trends` → 
 
 ## 9. Coolify et cron
 
-Suivre `docs/deploy.md` : application Docker Image `ghcr.io/<owner>/uptake-trends:latest`, variables d'environnement, domaine, webhook de déploiement, lignes cron (06:30 Europe/Paris et toutes les heures), `CRON_SECRET` (`openssl rand -hex 32`).
+Suivre `docs/deploy.md` : application Docker Image `ghcr.io/<owner>/uptake-trends:latest`, variables d'environnement, domaine, webhook de déploiement, `CRON_SECRET` (`openssl rand -hex 32`, indispensable : le superviseur intégré s'en sert pour lancer les tâches ; aucun cron externe).
 
 ## 10. Facultatif
 

@@ -68,15 +68,15 @@ Sur le VPS, seuls 80/443 et SSH sont ouverts. Postgres (5432), les ports interne
 
 ## 7. Tâches planifiées
 
-Configurer dans les tâches planifiées de Coolify ou dans le cron du VPS les appels suivants avec `CRON_SECRET` stocké dans l’environnement du planificateur :
+Aucun cron externe n'est nécessaire. Au démarrage, le serveur lance un superviseur (`src/instrumentation.ts`) qui appelle sa propre route `POST /api/cron/tick` (avec `CRON_SECRET`) 30 s après le démarrage puis toutes les 5 minutes. À chaque appel (`src/lib/pipeline/schedule.ts`) :
 
-```sh
-# Tous les jours à 06:30 Europe/Paris
-curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" https://trends.uptake.me/api/cron/daily
+- **daily** : dû à partir de 06:30 Europe/Paris tant qu'aucune analyse n'a réussi ce jour-là. Une analyse manquée (serveur arrêté, déploiement) est rattrapée au premier appel. Après un échec ou un repli : nouvel essai à +15 min, +1 h, +3 h, 4 essais par jour au plus. Une analyse « running » depuis plus de 30 min est considérée comme morte.
+- **hourly** : si aucun rafraîchissement depuis 55 minutes, et pas pendant une analyse.
+- **daily_missing** : incident ouvert à 09:00 sans analyse réussie (email si Resend est configuré, visible dans `/admin`), fermé à la première réussite.
 
-# Chaque heure
-curl -fsS -X POST -H "Authorization: Bearer $CRON_SECRET" https://trends.uptake.me/api/cron/hourly
-```
+Un bail en base (`scheduler_leases`, fonction `claim_lease`) garantit qu'un seul conteneur lance une tâche, même pendant un déploiement. Le superviseur est actif en production ; `SCHEDULER=off` le coupe, `SCHEDULER=on` l'active en local.
+
+Surveillance externe (facultative) : `GET /api/health` renvoie `forecast: "today"` ou `"missing"`, à brancher sur un moniteur de disponibilité. `/api/cron/tick` peut aussi être appelé de l'extérieur sans risque. `POST /api/cron/daily` et `/api/cron/hourly` restent disponibles pour forcer une exécution.
 
 Chaque exécution est enregistrée dans `cron_runs` et consultable dans `/admin`.
 
@@ -92,6 +92,6 @@ Chaque exécution est enregistrée dans `cron_runs` et consultable dans `/admin`
 
 1. `https://trends.uptake.me/api/health` renvoie `{"ok":true,"db":true}`. En cas de base inaccessible, `db` vaut `false` sans exposer d’identifiant ni de secret.
 2. Vérifier qu’une photo stockée dans le bucket `trend-images` se charge sur le site.
-3. Lancer une fois `daily` manuellement et vérifier l’entrée correspondante dans `cron_runs`.
+3. Attendre le premier passage du superviseur (30 s après le démarrage) et vérifier `cron_runs` ; après 06:30, `/api/health` doit donner `forecast: "today"`.
 4. Vérifier que les pages et tâches d’upTake répondent normalement et qu’aucun conteneur, volume, base ou secret n’est partagé.
 5. Confirmer qu’aucun port autre que 80/443 et SSH n’est ouvert sur le VPS.

@@ -38,7 +38,7 @@ Ce que l'agent ne peut pas faire (comptes, clés, lectures de conditions, décis
 - [ ] Applications dédiées trends° dans Coolify (Supabase + image GHCR, port 3000, health `/api/health`, domaine, variables)
 - [ ] DNS `trends`, `supabase.trends` et éventuellement `studio-trends` → VPS (Cloudflare : SSL Full strict)
 - [ ] Postgres non exposé ; ports publics limités à 80/443 et SSH
-- [ ] Lignes cron sur le VPS (06:30 Europe/Paris + horaire)
+- [ ] Journaux de l'application : `[scheduler] started` au démarrage ; `/api/health` → `forecast: "today"` après 06:30
 - [ ] Sauvegarde Postgres quotidienne, 14 jours, vers S3 externe ; volume Storage sauvegardé
 - [ ] Restauration de sauvegarde testée le : __________ ; volume Storage vérifié le : __________
 - [ ] Vérification mensuelle : image Supabase Coolify mise à jour après sauvegarde récente

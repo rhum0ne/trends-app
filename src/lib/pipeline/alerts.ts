@@ -5,11 +5,12 @@ import { db } from "@/lib/supabase/server";
 import { adminEmails, env } from "@/lib/env";
 import type { Json } from "@/lib/supabase/database.types";
 
-export type IncidentKind = "analysis_failed" | "sources_down";
+export type IncidentKind = "analysis_failed" | "sources_down" | "daily_missing";
 
 const SUBJECTS: Record<IncidentKind, string> = {
   analysis_failed: "trends°: daily analysis failed twice",
   sources_down: "trends°: fewer than two sources answered",
+  daily_missing: "trends°: no forecast published today yet",
 };
 
 /** Ouvre l'incident s'il ne l'est pas déjà ; n'envoie l'email qu'à l'ouverture. Renvoie true si une alerte part. */

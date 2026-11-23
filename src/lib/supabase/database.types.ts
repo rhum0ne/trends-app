@@ -207,6 +207,8 @@ export type Database = {
     Views: { [_ in never]: never };
     Functions: {
       increment_api_usage: { Args: { p_key_id: string; p_period: string }; Returns: number };
+      claim_lease: { Args: { p_job: string; p_holder: string; p_seconds: number }; Returns: boolean };
+      release_lease: { Args: { p_job: string; p_holder: string }; Returns: undefined };
     };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };

@@ -1,12 +1,15 @@
 // Rafraîchissement léger (CLAUDE.md § 5) : seule la composante « sources » change en cours de journée
 // (docs/heat.md). Pas d'IA, pas de BigQuery : Wikipédia, Bluesky et Hacker News seulement.
+// La prévision, l'expiration et le pic suivent la nouvelle chaleur (refreshOutlook).
 
 import { db, fetchAll } from "@/lib/supabase/server";
 import type { TrendDayRow } from "@/lib/supabase/database.types";
 import { collectSignals } from "@/lib/sources";
 import { heatFromComponents, rankByHeat, type HeatComponents, FREE_SOURCE_COUNT } from "@/lib/heat";
 import { matchesTopic } from "@/lib/normalize";
-import { parisToday } from "@/lib/format";
+import { addDays, parisToday } from "@/lib/format";
+import type { Lifespan } from "@/lib/types";
+import { refreshOutlook } from "./score";
 
 export interface HourlyReport {
   day: string;
@@ -17,10 +20,24 @@ export interface HourlyReport {
 export async function runHourly(): Promise<HourlyReport> {
   const day = parisToday();
   const client = db();
-  const { data: rows, error } = await client.from("trend_days").select("*, trends!inner(topic_key, signal_key, brand_safe, hidden)").eq("day", day);
+  const { data: rows, error } = await client
+    .from("trend_days")
+    .select("*, trends!inner(topic_key, signal_key, brand_safe, hidden, lifespan, peak_heat)")
+    .eq("day", day);
   if (error) throw new Error(error.message);
-  const list = (rows ?? []) as (TrendDayRow & { trends: { topic_key: string; signal_key: string | null; brand_safe: boolean; hidden: boolean } })[];
+  const list = (rows ?? []) as (TrendDayRow & {
+    trends: { topic_key: string; signal_key: string | null; brand_safe: boolean; hidden: boolean; lifespan: string; peak_heat: number | null };
+  })[];
   if (list.length === 0) return { day, updated: 0, sources: {} };
+
+  // Chaleur des deux jours précédents : la prévision en dépend (pic probable, docs/heat.md)
+  const { data: past, error: pastErr } = await client
+    .from("trend_days")
+    .select("trend_id, day, heat")
+    .in("trend_id", list.map((r) => r.trend_id))
+    .in("day", [addDays(day, -1), addDays(day, -2)]);
+  if (pastErr) throw new Error(pastErr.message);
+  const pastHeat = (id: string, d: string) => (past ?? []).find((p) => p.trend_id === id && p.day === d)?.heat ?? null;
 
   const results = await collectSignals({ day, only: ["wikipedia", "bluesky", "hackernews"] });
   const items = results.flatMap((r) => (r.ok ? r.items : []));
@@ -55,6 +72,14 @@ export async function runHourly(): Promise<HourlyReport> {
   for (const r of ranked) {
     const x = visible.find((v) => v.row.trend_id === r.key)!;
     const delta = x.heat - x.row.heat;
+    const outlook = refreshOutlook({
+      day,
+      heat: x.heat,
+      hPrev: pastHeat(r.key, addDays(day, -1)),
+      hPrev2: pastHeat(r.key, addDays(day, -2)),
+      lifespan: x.row.trends.lifespan as Lifespan,
+      peakHeat: x.row.trends.peak_heat,
+    });
     const { error: e } = await client
       .from("trend_days")
       .update({
@@ -62,13 +87,20 @@ export async function runHourly(): Promise<HourlyReport> {
         heat_change: x.row.heat_change + delta,
         rank: r.rank,
         is_top: r.key === top,
+        forecast: outlook.forecast,
         components: x.comp as unknown as TrendDayRow["components"],
         source_count: x.count,
         updated_at: new Date().toISOString(),
       })
       .eq("trend_id", r.key)
       .eq("day", day);
-    if (!e) updated++;
+    if (e) continue;
+    updated++;
+    // L'expiration et le pic suivent la chaleur ; updated_at de la tendance reste celui de l'analyse (sitemap)
+    await client
+      .from("trends")
+      .update({ expires_at: outlook.expires_at, ...(outlook.peak ?? {}) })
+      .eq("id", r.key);
   }
   return { day, updated, sources: Object.fromEntries(results.map((r) => [r.source, r.ok])) };
 }

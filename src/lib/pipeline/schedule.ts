@@ -1,6 +1,8 @@
 // Décisions du superviseur (CLAUDE.md § 5) : fonctions pures, testées. Aucune dépendance à un planificateur
 // externe : le serveur appelle /api/cron/tick toutes les 5 minutes et rattrape ce qui manque.
 
+import { parisInstant } from "@/lib/format";
+
 /** Heure de Paris de la tâche quotidienne. */
 export const DAILY_AT_MINUTES = 6 * 60 + 30;
 /** Au-delà, pas de prévision réussie aujourd'hui = incident « daily_missing ». */
@@ -79,23 +81,12 @@ export type ForecastStatus =
   | { state: "retrying"; nextAt: Date }
   | { state: "delayed" };
 
-/** Date (instant) d'une heure de Paris donnée, le jour de Paris de `now` + `addDays`. */
-function parisInstant(now: Date, minutes: number, addDaysCount = 0): Date {
-  // Point de départ : l'instant UTC qui porterait cette heure, puis correction du décalage de Paris ce jour-là
-  const { day } = parisClock(now);
-  const [y, m, d] = day.split("-").map(Number);
-  const guess = new Date(Date.UTC(y, m - 1, d + addDaysCount, Math.floor(minutes / 60), minutes % 60));
-  const offset = parisClock(guess).minutes - minutes; // +60 l'hiver, +120 l'été (modulo minuit)
-  const norm = ((offset % 1440) + 1440) % 1440;
-  return new Date(guess.getTime() - norm * 60_000);
-}
-
 /** État public de la prévision du jour, pour l'écran sans prévision (mêmes règles que le superviseur). */
 export function forecastStatus(now: Date, runs: RunSummary[]): ForecastStatus {
   const decision = decideDaily(now, runs);
   if (decision.reason === "done") return { state: "ready" };
   if (decision.reason === "in_progress" || decision.run) return { state: "running" };
-  if (decision.reason === "too_early") return { state: "scheduled", nextAt: parisInstant(now, DAILY_AT_MINUTES) };
+  if (decision.reason === "too_early") return { state: "scheduled", nextAt: parisInstant(parisClock(now).day, DAILY_AT_MINUTES) };
   if (decision.reason === "gave_up") return { state: "delayed" };
   // backoff : prochain essai = dernier essai + délai
   const attempts = runs.filter((r) => r.status === "failed" || r.status === "fallback" || r.status === "running");

@@ -2,6 +2,7 @@
 // Les pondérations sont un point de départ : tout changement de formule est noté dans docs/heat.md.
 
 import type { Lifespan } from "@/lib/types";
+import { addDays, parisInstant } from "@/lib/format";
 import { clampHeat } from "./levels";
 
 export * from "./levels";
@@ -199,11 +200,16 @@ export function computeOutlook(input: OutlookInput): Outlook {
   return { forecast, peakTomorrow: isRisingTwoDays(input), coolsInDays, bestWindow, curveTitle: curveTitle(input), expiresInDays };
 }
 
-/** expires_at : début (UTC) du jour où la prévision passe sous 40, 14 jours au plus. */
+/**
+ * Heure de Paris où une tendance expire, le jour où sa prévision passe sous 40. Égale à l'heure de l'alerte
+ * « daily_missing » (DAILY_ALERT_AT_MINUTES) : l'analyse de 06:30 et ses nouveaux essais ont pu la republier avant ;
+ * expirer à minuit la ferait refroidir chaque nuit avant même d'être remesurée.
+ */
+export const EXPIRE_AT_PARIS_MINUTES = 9 * 60;
+
+/** expires_at : 09:00 à Paris le jour où la prévision passe sous 40 (le lendemain au plus tôt), 14 jours au plus. */
 export function expiresAt(day: string, expiresInDays: number): string {
-  const d = new Date(`${day}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + Math.max(1, Math.min(MAX_LIFETIME_DAYS, expiresInDays)));
-  return d.toISOString();
+  return parisInstant(addDays(day, Math.max(1, Math.min(MAX_LIFETIME_DAYS, expiresInDays))), EXPIRE_AT_PARIS_MINUTES).toISOString();
 }
 
 // ─── Facteurs « signals » ──────────────────────────────────────────────────

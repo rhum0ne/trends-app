@@ -137,8 +137,17 @@ describe("forecast", () => {
   it("never lives more than 14 days", () => {
     const o = computeOutlook({ h0: 100, hPrev: 99, hPrev2: 98, lifespan: "2+ weeks" });
     expect(o.expiresInDays).toBeLessThanOrEqual(MAX_LIFETIME_DAYS);
-    expect(expiresAt("2026-11-22", 99)).toBe("2026-12-06T00:00:00.000Z");
-    expect(expiresAt("2026-11-22", 0)).toBe("2026-11-23T00:00:00.000Z");
+    expect(expiresAt("2026-11-22", 99)).toBe("2026-12-06T08:00:00.000Z");
+  });
+
+  it("expires at 09:00 Paris, never before the next morning's analysis", () => {
+    // 30° sans Google : la prévision passe sous 40 dès J+1
+    const cold = computeOutlook({ h0: 30, hPrev: null, hPrev2: null, lifespan: "2+ weeks" });
+    expect(cold.expiresInDays).toBe(1);
+    expect(expiresAt("2026-11-23", cold.expiresInDays)).toBe("2026-11-24T08:00:00.000Z");
+    expect(expiresAt("2026-11-22", 0)).toBe("2026-11-23T08:00:00.000Z");
+    // Heure d'été : Paris = UTC+2
+    expect(expiresAt("2026-07-01", 2)).toBe("2026-07-03T07:00:00.000Z");
     expect(projection({ h0: 100, hPrev: 99, hPrev2: 98, lifespan: "2+ weeks" }, 14)).toBeLessThan(100);
   });
 });

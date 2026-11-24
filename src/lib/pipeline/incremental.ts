@@ -38,7 +38,8 @@ function matches(c: Candidate, k: KnownTrend): boolean {
 export function refreshReason(k: Pick<KnownTrend, "analyzed_at" | "expires_at">, day: string, now: Date): "never_analyzed" | "stale" | "expired" | null {
   if (!k.analyzed_at) return "never_analyzed";
   if (daysBetween(parisToday(new Date(k.analyzed_at)), day) >= REANALYZE_AFTER_DAYS) return "stale";
-  if (Date.parse(k.expires_at) <= now.getTime()) return "expired";
+  // Expirée, ou qui expire aujourd'hui (à 09:00, après l'analyse de 06:30) : sa prévision passe sous 40
+  if (Date.parse(k.expires_at) <= now.getTime() || parisToday(new Date(k.expires_at)) <= day) return "expired";
   return null;
 }
 

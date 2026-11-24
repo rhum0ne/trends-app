@@ -22,7 +22,7 @@ En-tête de chaque appel : `Authorization: Bearer $TRENDS_API_KEY`. La clé inte
 | `GET /trends/{slug}` | Le détail d'une tendance, avec `history` (chaleur par jour). |
 | `GET /countries` | Les pays suivis et leur tendance la plus chaude. |
 
-Réponses en JSON, cache HTTP de 10 minutes. `v1` ne perd jamais de champ ; un changement cassant passerait en `v2`.
+Réponses en JSON, cache HTTP de 10 minutes. Référence complète (champs, erreurs, limites) : `docs/api.md`. `v1` ne perd jamais de champ ; un changement cassant passerait en `v2`.
 
 ## Champs utiles pour un moment « Trend »
 
@@ -41,7 +41,7 @@ Réponses en JSON, cache HTTP de 10 minutes. `v1` ne perd jamais de champ ; un c
   "heat": 94, "heat_level": "scorching", "heat_change": 12,
   "forecast": [94, 97, 81, 66, 54],               // aujourd'hui puis 4 jours
   "countries": [{ "code": "US", "heat": 96, "rank": 1 }],
-  "expires_at": "2026-11-27T00:00:00.000Z",       // ne plus proposer après cette date
+  "expires_at": "2026-11-27T08:00:00.000Z",       // ne plus proposer après cette date
   "is_top": true,
   "image": {                                       // ou null
     "url": "https://….supabase.co/storage/v1/object/public/trend-images/gta-6-123.jpg",

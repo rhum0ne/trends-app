@@ -1,6 +1,6 @@
 // Chaleur, sélection et pays d'une journée — pur, sans I/O (docs/heat.md ; CLAUDE.md § 5.3).
 
-import type { SourceName } from "@/lib/types";
+import type { Lifespan, SourceName } from "@/lib/types";
 import type { SourceItem, SourceResult } from "@/lib/sources";
 import type { CheckedTrend } from "@/lib/ai/checks";
 import { matchesTopic } from "@/lib/normalize";
@@ -8,6 +8,7 @@ import {
   computeCountryHeat,
   computeHeat,
   computeOutlook,
+  expiresAt,
   rankByHeat,
   MAX_PUBLISHED,
   type HeatComponents,
@@ -64,6 +65,26 @@ export interface ScoreOutput {
   published: ScoredTrend[];
   unconfirmed: { topic: string; reason: string }[];
   trackedCountries: string[];
+}
+
+export interface RefreshedOutlook {
+  forecast: number[];
+  expires_at: string;
+  /** Nouveau pic, seulement si la chaleur du jour le dépasse. */
+  peak: { peak_heat: number; peak_day: string } | null;
+}
+
+/**
+ * Rafraîchissement horaire : la chaleur a changé, la prévision, l'expiration et le pic suivent
+ * (mêmes règles que l'analyse du matin, docs/heat.md).
+ */
+export function refreshOutlook(input: { day: string; heat: number; hPrev: number | null; hPrev2: number | null; lifespan: Lifespan; peakHeat: number | null }): RefreshedOutlook {
+  const outlook = computeOutlook({ h0: input.heat, hPrev: input.hPrev, hPrev2: input.hPrev2, lifespan: input.lifespan });
+  return {
+    forecast: outlook.forecast,
+    expires_at: expiresAt(input.day, outlook.expiresInDays),
+    peak: input.peakHeat === null || input.heat > input.peakHeat ? { peak_heat: input.heat, peak_day: input.day } : null,
+  };
 }
 
 export function scoreDay({ accepted, results, prev, yesterdayGoogle }: ScoreInput): ScoreOutput {

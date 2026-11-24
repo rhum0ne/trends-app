@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { dailyMissing, decideDaily, decideHourly, forecastStatus, parisClock, type RunSummary } from "./schedule";
+import { EXPIRE_AT_PARIS_MINUTES } from "@/lib/heat";
+import { DAILY_ALERT_AT_MINUTES, dailyMissing, decideDaily, decideHourly, forecastStatus, parisClock, type RunSummary } from "./schedule";
 
 // 23 novembre 2026 : heure d'hiver, Paris = UTC+1
 const at = (hhmm: string) => new Date(`2026-11-23T${hhmm}:00+01:00`);
@@ -54,6 +55,12 @@ describe("decideDaily", () => {
   });
   it("does not count skipped runs as attempts", () => {
     expect(decideDaily(at("06:31"), [run("skipped", "06:30")])).toEqual({ run: true, reason: "due" });
+  });
+});
+
+describe("expiry hour", () => {
+  it("matches the daily_missing alert hour, after the morning analysis", () => {
+    expect(EXPIRE_AT_PARIS_MINUTES).toBe(DAILY_ALERT_AT_MINUTES);
   });
 });
 

@@ -42,7 +42,7 @@ Modèle simple de refroidissement, à partir de la chaleur du jour `h0`, de la t
 - Décroissance : `h(n) = round(h_pic * 0.5^(n / demi_vie))`.
 - « Cools in ~N days » = premier jour où la prévision passe sous 60. « Best window to post » = les jours de prévision ≥ 75 (au plus 2), sinon « today ».
 - Titre de la courbe (`/t/{slug}`), par règle : pic à venir → « peak tomorrow, then it cools » ; déjà en baisse → « past its peak » ; stable → « holding steady ».
-- `expires_at` = jour où la prévision passe sous 40, 14 jours au plus.
+- `expires_at` = jour où la prévision passe sous 40 (le lendemain au plus tôt), à 09:00 heure de Paris, 14 jours au plus.
 
 ## Facteurs « signals »
 
@@ -83,6 +83,6 @@ La fiche officielle du jeu de données n'a pas pu être lue (console Google non 
 - « Cools in ~N days » : premier `n ≥ 0` où la projection passe sous 60 (0 = « cooling now ») ; au-delà de 14 jours : « holding for now ».
 - « Best window » : les jours de prévision ≥ 75, les 2 plus chauds au plus, dans l'ordre des jours ; aucun → « today ».
 - Titres de courbe ajoutés : sujet nouveau → « just heating up » ; hausse de plus de 2° sans pic prévu → « heating up ». Baisse de plus de 2° → « past its peak » ; sinon « holding steady ».
-- `expires_at` : début (UTC) du premier jour `n ≥ 1` où la projection passe sous 40, 14 jours au plus.
-- Rafraîchissement `hourly` : Wikipédia, Bluesky et Hacker News sont relus ; Google garde sa contribution du matin ; une source en panne garde aussi la sienne (la chaleur ne baisse pas à cause d'une panne).
+- `expires_at` : 09:00 heure de Paris (`EXPIRE_AT_PARIS_MINUTES`, l'heure de l'alerte `daily_missing`) du premier jour `n ≥ 1` où la projection passe sous 40, 14 jours au plus. Avant le 2026-11-24 : minuit UTC, ce qui faisait refroidir chaque nuit, avant l'analyse de 06:30, toute tendance sous ~50° (sous 40° partout sans Google). Une tendance qui expire le jour de l'analyse est réanalysée si une source la cite encore (`refreshReason` : « expired »).
+- Rafraîchissement `hourly` : Wikipédia, Bluesky et Hacker News sont relus ; Google garde sa contribution du matin ; une source en panne garde aussi la sienne (la chaleur ne baisse pas à cause d'une panne). La prévision, `expires_at` et le pic sont recalculés avec la nouvelle chaleur (`refreshOutlook`), mêmes règles que le matin ; `trends.updated_at` (sitemap) ne bouge pas.
 - Facteurs « signals » : recherche = nombre de pays Google du jour / moyenne des 7 jours précédents (pris dans `trend_days.components`) ; Wikipédia = vues ; actualité tech = points Hacker News. Absent si pas d'historique.

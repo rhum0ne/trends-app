@@ -81,6 +81,17 @@ export function parisToday(now: Date = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Paris", year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
 }
 
+/** L'instant où il est `minutes` (depuis minuit) à Paris le jour `day` (YYYY-MM-DD), heure d'été comprise. */
+export function parisInstant(day: string, minutes: number): Date {
+  const [y, m, d] = day.split("-").map(Number);
+  // Point de départ : l'instant UTC qui porterait cette heure, puis correction du décalage de Paris ce jour-là
+  const guess = new Date(Date.UTC(y, m - 1, d, Math.floor(minutes / 60), minutes % 60));
+  const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Paris", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(guess);
+  const get = (t: string) => Number(parts.find((p) => p.type === t)?.value ?? 0);
+  const offset = (((get("hour") * 60 + get("minute") - minutes) % 1440) + 1440) % 1440; // +60 l'hiver, +120 l'été
+  return new Date(guess.getTime() - offset * 60_000);
+}
+
 /** Date et heure à Paris, pour l'administration : « 23 Nov, 06:30 ». */
 export function parisDateTime(iso: string): string {
   return new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Paris", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date(iso));

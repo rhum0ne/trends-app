@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { scoreDay } from "./score";
+import { refreshOutlook, scoreDay } from "./score";
 import type { CheckedTrend } from "@/lib/ai/checks";
 import type { SourceResult } from "@/lib/sources";
 
@@ -70,5 +70,18 @@ describe("scoreDay", () => {
     const many = Array.from({ length: 14 }, (_, i) => trend(`T${i}`, `topic ${i}`));
     const r: SourceResult[] = [{ source: "wikipedia", ok: true, ms: 1, items: many.map((t) => ({ source: "wikipedia" as const, raw: t.topic, key: t.topic_key, country: null, rank: 1, value: 1 })) }];
     expect(scoreDay({ accepted: many, results: r, prev: new Map(), yesterdayGoogle: [] }).published).toHaveLength(10);
+  });
+});
+
+describe("refreshOutlook", () => {
+  it("moves the forecast, expiry and peak with the hourly heat", () => {
+    const r = refreshOutlook({ day: "2026-11-24", heat: 35, hPrev: 30, hPrev2: null, lifespan: "3-7 days", peakHeat: 30 });
+    expect(r.forecast[0]).toBe(35);
+    expect(r.forecast).toHaveLength(5);
+    expect(r.expires_at).toBe("2026-11-25T08:00:00.000Z");
+    expect(r.peak).toEqual({ peak_heat: 35, peak_day: "2026-11-24" });
+  });
+  it("keeps the peak when the heat stays below it", () => {
+    expect(refreshOutlook({ day: "2026-11-24", heat: 25, hPrev: 30, hPrev2: null, lifespan: "3-7 days", peakHeat: 30 }).peak).toBeNull();
   });
 });

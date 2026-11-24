@@ -10,6 +10,7 @@ Ce fichier dit à un agent IA ce qu'est trends°, ce qu'il doit faire et ce qu'i
 | `docs/heat.md` | Calcul de la chaleur (degrés), de la prévision et du classement par pays |
 | `docs/images.md` | Photos des tendances (Pexels), filtre thermique, crédits |
 | `docs/sources.md` | Conditions d'utilisation de chaque source, lues et datées |
+| `docs/api.md` | API `v1` (offres, points d'accès, erreurs), routes du site, administration et routes d'exploitation |
 | `docs/design/tokens.json`, `docs/design/bundle.css` | Jetons et styles de référence des composants |
 
 Les numéros de section peuvent être cités dans le code (`CLAUDE.md § 6`) : ne pas les renuméroter. Les demandes explicites de l'humain priment.
@@ -117,7 +118,7 @@ Une tâche `daily` par jour à 06:30 Europe/Paris, plus un rafraîchissement lé
 
 ## 7. API (contrat avec upTake et les autres clients)
 
-Versionnée : `/api/v1/…`. JSON, UTF-8, CORS ouvert en lecture, cache de 10 minutes.
+Versionnée : `/api/v1/…`. JSON, UTF-8, CORS ouvert en lecture, cache de 10 minutes. Référence complète : `docs/api.md` (à tenir à jour à chaque changement d'une route).
 
 | Point d'accès | Rend |
 | --- | --- |

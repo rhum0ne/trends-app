@@ -41,6 +41,9 @@ describe("refreshReason", () => {
   });
   it("refreshes an expired trend and one never analyzed", () => {
     expect(refreshReason(known({ topic_key: "a", expires_at: "2026-11-23T00:00:00Z" }), DAY, NOW)).toBe("expired");
+    // Expire aujourd'hui à 09:00, après l'analyse de 06:30 : sa prévision passe sous 40, on la refait
+    expect(refreshReason(known({ topic_key: "a", expires_at: "2026-11-23T08:00:00Z" }), DAY, NOW)).toBe("expired");
+    expect(refreshReason(known({ topic_key: "a", expires_at: "2026-11-24T08:00:00Z" }), DAY, NOW)).toBeNull();
     expect(refreshReason(known({ topic_key: "a", analyzed_at: null }), DAY, NOW)).toBe("never_analyzed");
   });
 });

@@ -92,6 +92,8 @@ export type TrendImageRow = {
   width: number;
   height: number;
   avg_color: string | null;
+  /** Courbe de tonalité (11 valeurs 0–1), docs/images.md § 4 ; null tant qu'elle n'est pas calculée. */
+  tone: number[] | null;
   alt: string;
   photographer: string;
   photographer_url: string;

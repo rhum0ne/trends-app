@@ -6,6 +6,7 @@ import { computeOutlook, heatLevel, heatwaveDays } from "@/lib/heat";
 import { addDays } from "@/lib/format";
 import { entitlements, type PlanId } from "@/lib/plans";
 import { POWERED_BY } from "@/lib/links";
+import { isTone } from "@/lib/images/thermal";
 
 export interface ViewInput {
   trend: TrendRow;
@@ -32,7 +33,16 @@ export function imageFromRow(row: TrendImageRow | null, imageUrl: (p: string) =>
     avg_color: row.avg_color,
     credit: { name: row.photographer, url: row.photographer_url },
     source_url: row.pexels_url,
+    tone: isTone(row.tone) ? row.tone : null,
   };
+}
+
+/** L'image telle que l'API v1 la sert (§ 7) : sans la courbe de tonalité interne. */
+function publicImage(image: TrendImage | null): TrendImage | null {
+  if (!image) return null;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { tone, ...rest } = image;
+  return rest;
 }
 
 function arr<T>(v: unknown): T[] {
@@ -137,7 +147,7 @@ export function toPublicTrend(view: TrendView, plan: PlanId): PublicTrend & { po
     last_seen: view.last_seen,
     expires_at: view.expires_at,
     is_top: view.is_top,
-    image: view.image,
+    image: publicImage(view.image),
     day: view.day,
   };
   if (ent.poweredBy) out.powered_by = POWERED_BY;

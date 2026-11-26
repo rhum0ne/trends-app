@@ -9,6 +9,7 @@ import { heatFromComponents, rankByHeat, type HeatComponents, FREE_SOURCE_COUNT 
 import { matchesTopic } from "@/lib/normalize";
 import { addDays, parisToday } from "@/lib/format";
 import type { Lifespan } from "@/lib/types";
+import { backfillTones } from "@/lib/images/store";
 import { refreshOutlook } from "./score";
 
 export interface HourlyReport {
@@ -20,6 +21,8 @@ export interface HourlyReport {
 export async function runHourly(): Promise<HourlyReport> {
   const day = parisToday();
   const client = db();
+  // Courbes de tonalité manquantes des photos actives (docs/images.md § 4) ; ne lève jamais d'erreur
+  await backfillTones();
   const { data: rows, error } = await client
     .from("trend_days")
     .select("*, trends!inner(topic_key, signal_key, brand_safe, hidden, lifespan, peak_heat)")

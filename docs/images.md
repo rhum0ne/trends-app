@@ -32,7 +32,11 @@ Chaque tendance publiée a une vraie photo, choisie automatiquement sur Pexels �
 
 ## 4. Filtre thermique
 
-Composant `ThermalImage` (`src/components/ThermalImage.tsx`) : `next/image` (`alt` obligatoire, dimensions connues) avec `filter: url(#thermal)`. Filtre défini une seule fois dans le layout :
+Composant `ThermalImage` (`src/components/ThermalImage.tsx`) : `next/image` (`alt` obligatoire, dimensions connues) passé dans un filtre SVG en trois étapes : niveaux de gris → **courbe de tonalité de la photo** → palette. Palettes, courbe et tables dans `src/lib/images/thermal.ts` (pur, testé), partagé avec les images Open Graph.
+
+**Courbe de tonalité** (`toneCurve`) : sans elle, la couleur dépend de la luminosité brute, et la médiane des photos va de 4 % à 67 % (mesuré sur les photos du 26/11) : une photo sombre sortait toute bleu nuit, une claire toute jaune. On égalise donc partiellement l'histogramme de chaque photo (70 % égalisation, 30 % photo d'origine, `TONE_STRENGTH`) : 11 valeurs de 0 à 1, calculées avec `sharp` à la copie (`toneOf`, vignette de 128 px) et gardées dans `trend_images.tone`. Les photos sans courbe (copiées avant, calcul en échec) sont rattrapées par le rafraîchissement horaire (`backfillTones`, 20 par passage). Le composant écrit pour chaque photo deux filtres (`#th-n-<clé>`, `#th-d-<clé>`, clé = empreinte de la courbe) et les passe en variables CSS (`--th-night`, `--th-day`) ; sans courbe, il retombe sur les filtres communs `#thermal` et `#thermal-day`. La courbe ne sort jamais dans l'API (`toPublicTrend` la retire).
+
+Filtres communs, définis une seule fois dans le layout (sans courbe de tonalité) :
 
 ```html
 <svg width="0" height="0" aria-hidden="true" style="position:absolute">
@@ -49,7 +53,7 @@ Composant `ThermalImage` (`src/components/ThermalImage.tsx`) : `next/image` (`al
 
 Correspondance : noir → `heat-0` → `heat-1` → `heat-2` → `heat-3` → `heat-4` (zones claires = zones chaudes).
 
-Thème `day` : même filtre `#thermal`, photo estompée à 45 % d'opacité sur le fond clair (`night` du thème day) : tons pastel, mêmes couleurs de chaleur. Voiles clairs, texte, stickers et boutons « on photo » à l'encre, crédit sur pastille claire. Les images Open Graph et la carte partageable restent en `#thermal` (night).
+Thème `day` : palette day (`DAY_PALETTE`, filtre `#thermal-day` ou `--th-day`) : mêmes couleurs dans le même ordre, éclaircies, et les ombres partent d'un indigo moyen (`#5a4fc4`) au lieu du noir : `#5a4fc4` → `#6f8fff` → `#ad8cff` → `#f58fbe` → `#ffb27a` → `#fff0b8`. La photo est affichée pleinement, sans opacité (l'ancienne photo night estompée à 45 % sortait grise et terne, parfois presque invisible). Voiles clairs, texte, stickers et boutons « on photo » à l'encre, crédit sur pastille claire. Les images Open Graph et la carte partageable restent en palette night, avec la même courbe de tonalité (calculée à la volée par `sharp`).
 
 - Prop `variant: "thermal" | "natural" | "cooled"` (`thermal` par défaut ; `natural` pour l'aperçu admin ; `cooled` = niveaux de gris atténués pour les tendances passées).
 - Pendant le chargement : fond `avg_color` passé dans le même dégradé, sans saut de mise en page.
@@ -59,4 +63,4 @@ Thème `day` : même filtre `#thermal`, photo estompée à 45 % d'opacité sur l
 
 ## 5. Tests
 
-`checkImageQuery`, `pickPhoto` (déjà utilisées, trop sombres, format, liste vide), client Pexels avec HTTP simulé (200, 429, délai, sans clé), champ `image` de l'API (présent ou `null`).
+`checkImageQuery`, `pickPhoto` (déjà utilisées, trop sombres, format, liste vide), client Pexels avec HTTP simulé (200, 429, délai, sans clé), champ `image` de l'API (présent ou `null`, sans `tone`), `toneCurve` / `isTone` / `thermalLut` / palettes (`thermal.test.ts`).

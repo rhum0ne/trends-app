@@ -65,6 +65,7 @@ Ce que l'agent ne peut pas faire (comptes, clés, lectures de conditions, décis
 - [ ] Vérifier l'icône dans un onglet Chrome, sur l'écran d'accueil iOS et sur Android
 - [ ] Carte partageable `/t/{slug}/card` et image Open Graph : police Archivo largeur normale (limite de `next/og`), à valider
 - [ ] Contraste 4,5:1 sur les photos réelles (texte sur dégradé sombre)
+- [ ] Photos en thème day après déploiement de la courbe de tonalité : une heure après la mise en ligne (rattrapage horaire), toutes les photos de `/`, `/t/{slug}` et `/c/{code}` lisibles et de même intensité ; `select count(*) from trend_images where active and tone is null` → 0
 - [ ] API : `curl` sans clé (tendance du jour, `powered_by`), avec la clé interne (tout), 31 appels sans clé → `429` avec `Retry-After`
 
 ## Relecture quotidienne (phase 0, ~10 min)

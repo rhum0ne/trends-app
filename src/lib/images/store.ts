@@ -7,6 +7,7 @@ import type { Category } from "@/lib/types";
 import type { Json } from "@/lib/supabase/database.types";
 import { CATEGORY_IMAGE_QUERY } from "./queries";
 import { pickPhoto, searchPexels, type PexelsPhoto } from "./pexels";
+import { toneCurve } from "./thermal";
 import { addDays, parisToday } from "@/lib/format";
 
 export interface PhotoOutcome {
@@ -21,7 +22,13 @@ async function recentlyUsedIds(): Promise<Set<number>> {
   return new Set(rows.map((r) => Number(r.pexels_id)));
 }
 
-async function copyToStorage(slug: string, photo: PexelsPhoto): Promise<{ path: string; width: number; height: number }> {
+/** Courbe de tonalité d'une photo (docs/images.md § 4), calculée sur une vignette en niveaux de gris. */
+export async function toneOf(bytes: Uint8Array): Promise<number[]> {
+  const { data } = await sharp(bytes).resize(128, 128, { fit: "inside" }).greyscale().raw().toBuffer({ resolveWithObject: true });
+  return toneCurve(data);
+}
+
+async function copyToStorage(slug: string, photo: PexelsPhoto): Promise<{ path: string; width: number; height: number; tone: number[] | null }> {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 20_000);
   try {
@@ -33,14 +40,15 @@ async function copyToStorage(slug: string, photo: PexelsPhoto): Promise<{ path: 
     const path = `${slug}-${photo.id}.jpg`;
     const { error } = await db().storage.from(IMAGE_BUCKET).upload(path, bytes, { contentType: "image/jpeg", upsert: true, cacheControl: "31536000" });
     if (error) throw new Error(`storage: ${error.message}`);
-    return { path, width: meta.width ?? photo.width, height: meta.height ?? photo.height };
+    const tone = await toneOf(bytes).catch(() => null);
+    return { path, width: meta.width ?? photo.width, height: meta.height ?? photo.height, tone };
   } finally {
     clearTimeout(timer);
   }
 }
 
 async function saveImage(trendId: string, slug: string, photo: PexelsPhoto, query: string, candidates: PexelsPhoto[]): Promise<void> {
-  const { path, width, height } = await copyToStorage(slug, photo);
+  const { path, width, height, tone } = await copyToStorage(slug, photo);
   const client = db();
   await client.from("trend_images").update({ active: false }).eq("trend_id", trendId).eq("active", true);
   const { error } = await client.from("trend_images").insert({
@@ -50,6 +58,7 @@ async function saveImage(trendId: string, slug: string, photo: PexelsPhoto, quer
     width,
     height,
     avg_color: photo.avg_color,
+    tone,
     alt: (photo.alt || query).slice(0, 300),
     photographer: photo.photographer,
     photographer_url: photo.photographer_url,
@@ -118,4 +127,30 @@ export async function nextPhoto(trendId: string): Promise<PhotoOutcome> {
 export async function removePhoto(trendId: string): Promise<void> {
   const { error } = await db().from("trend_images").update({ active: false }).eq("trend_id", trendId).eq("active", true);
   if (error) throw new Error(error.message);
+}
+
+/**
+ * Rattrapage : calcule la courbe de tonalité des photos actives qui n'en ont pas (copiées avant son ajout,
+ * ou calcul en échec). Appelé par le rafraîchissement horaire ; ne lève jamais d'erreur.
+ */
+export async function backfillTones(limit = 20): Promise<number> {
+  try {
+    const client = db();
+    const { data } = await client.from("trend_images").select("id, storage_path").eq("active", true).is("tone", null).limit(limit);
+    let done = 0;
+    for (const row of data ?? []) {
+      try {
+        const { data: file, error } = await client.storage.from(IMAGE_BUCKET).download(row.storage_path);
+        if (error || !file) continue;
+        const tone = await toneOf(new Uint8Array(await file.arrayBuffer()));
+        const { error: e } = await client.from("trend_images").update({ tone }).eq("id", row.id);
+        if (!e) done++;
+      } catch {
+        // Photo illisible : nouvel essai à la prochaine heure
+      }
+    }
+    return done;
+  } catch {
+    return 0;
+  }
 }

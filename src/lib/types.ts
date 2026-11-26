@@ -50,6 +50,8 @@ export interface TrendImage {
   avg_color: string | null;
   credit: { name: string; url: string };
   source_url: string;
+  /** Interne (filtre thermique, docs/images.md § 4) : jamais servi par l'API, retiré par toPublicTrend. */
+  tone?: number[] | null;
 }
 
 export interface CountryHeat {

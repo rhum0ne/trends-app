@@ -149,7 +149,7 @@ a { color: inherit; }
 @layer components { .tr-photo { position: relative; } }
 .tr-photo { overflow: hidden; background: var(--surface-2); isolation: isolate; }
 .tr-photo img { object-fit: cover; }
-.tr-photo.thermal img { filter: url(#thermal); }
+.tr-photo.thermal img { filter: var(--th-night, url(#thermal)); }
 .tr-photo.cooled img { filter: grayscale(1) brightness(0.6) contrast(0.9); }
 .tr-photo .ph-bg { position: absolute; inset: 0; filter: url(#thermal); }
 .tr-photo.cooled .ph-bg { filter: grayscale(1) brightness(0.6); }
@@ -167,11 +167,11 @@ a { color: inherit; }
 /* Texte posé sur une photo : clair la nuit, à l'encre le jour (voile clair) */
 .tr-on-photo { color: #f5f3ff; }
 
-/* Thème day : même filtre #thermal, photo estompée (45 %) sur le fond clair : tons pastel,
+/* Thème day : palette day (#thermal-day ou le filtre de la photo, --th-day) : mêmes couleurs de chaleur, éclaircies,
    voiles clairs, texte, stickers et boutons à l'encre (docs/images.md § 4) */
 [data-theme="day"] .tr-on-photo { color: var(--ink); }
-[data-theme="day"] .tr-photo.thermal { background: var(--night); }
-[data-theme="day"] .tr-photo.thermal img, [data-theme="day"] .tr-photo.thermal .ph-bg { opacity: 0.45; }
+[data-theme="day"] .tr-photo.thermal img { filter: var(--th-day, url(#thermal-day)); }
+[data-theme="day"] .tr-photo.thermal .ph-bg { filter: url(#thermal-day); }
 [data-theme="day"] .tr-photo.cooled img { filter: grayscale(1) brightness(1.2) contrast(0.8); }
 [data-theme="day"] .tr-photo.cooled .ph-bg { filter: grayscale(1) brightness(1.2); }
 [data-theme="day"] .tr-scrim-b::after { background: linear-gradient(180deg, rgba(247, 245, 251, 0) 30%, rgba(247, 245, 251, 0.9) 100%); }

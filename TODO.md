@@ -45,7 +45,8 @@ Les vérifications humaines sont dans `CHECKLIST.md`.
 - [x] `/`, `/t/{slug}`, `/c`, `/c/{code}`, `/archive`, `/api`, en-tête, pied de page, thème, Shuffle, sélection de pays
 - [x] Carte story partageable (`next/og`), images Open Graph, sitemap, IndexNow, `noindex`
 - [x] Page d'attente quand `PUBLIC_SITE=false`
-- [x] Accueil : héros à la hauteur de l'écran (ticker + en-tête + héros visibles sans défiler, vérifié 375×812, 800×600, 1280×720, 1440×900), photo thermique estompée (45 %) et voiles clairs en thème day, défilement magnétique centré sur les sections (`tr-snap`). Pas encore vu sur `/t/{slug}` et `/c/{code}` avec de vraies données en day (base locale arrêtée)
+- [x] Accueil : héros à la hauteur de l'écran (ticker + en-tête + héros visibles sans défiler, vérifié 375×812, 800×600, 1280×720, 1440×900), voiles clairs en thème day, défilement magnétique centré sur les sections (`tr-snap`). Pas encore vu sur `/t/{slug}` et `/c/{code}` avec de vraies données en day (base locale arrêtée)
+- [x] Photos thermiques homogènes : courbe de tonalité par photo (`trend_images.tone`, calculée à la copie, rattrapée chaque heure) et palette day dédiée sans opacité (`docs/images.md` § 4) ; vérifié sur les 9 photos de production, night et day
 - [x] Icône « t° » générée par `pnpm build:icon` (glyphe Archivo wdth 62 / wght 800 → `<path>`, anneau `heat-4`) : `icon.svg`, `favicon.ico`, `apple-icon.png`, icônes PWA, `og-avatar.png`, `manifest.ts`, section du `/styleguide`
 
 ## Étape 9 — Administration

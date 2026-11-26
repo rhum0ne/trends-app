@@ -2,6 +2,7 @@ import Image from "next/image";
 import type { CSSProperties } from "react";
 import type { TrendImage } from "@/lib/types";
 import { PEXELS_URL } from "@/lib/links";
+import { DAY_PALETTE, NIGHT_PALETTE, toneKey, type Palette } from "@/lib/images/thermal";
 
 export type ThermalVariant = "thermal" | "natural" | "cooled";
 
@@ -45,8 +46,18 @@ export function ThermalImage({
       </div>
     );
   }
+  // Courbe de tonalité propre à la photo : filtres night et day dédiés, choisis par le CSS selon le thème
+  const tone = variant === "thermal" && image.tone ? image.tone : null;
+  const key = tone ? toneKey(tone) : null;
+  const toneStyle = key ? ({ "--th-night": `url(#th-n-${key})`, "--th-day": `url(#th-d-${key})` } as CSSProperties) : undefined;
   return (
-    <div className={cls} style={style}>
+    <div className={cls} style={toneStyle ? { ...style, ...toneStyle } : style}>
+      {tone && key ? (
+        <svg width="0" height="0" aria-hidden="true" focusable="false" style={{ position: "absolute" }}>
+          <ThermalFilter id={`th-n-${key}`} palette={NIGHT_PALETTE} tone={tone} />
+          <ThermalFilter id={`th-d-${key}`} palette={DAY_PALETTE} tone={tone} />
+        </svg>
+      ) : null}
       {image.avg_color ? <div className="ph-bg" style={{ background: image.avg_color }} aria-hidden="true" /> : null}
       <Image
         src={image.url}
@@ -72,21 +83,38 @@ export function ThermalImage({
   );
 }
 
+/** Un filtre thermique : niveaux de gris, courbe de tonalité de la photo (si connue), puis palette. */
+function ThermalFilter({ id, palette, tone }: { id: string; palette: Palette; tone?: number[] | null }) {
+  const t = tone?.join(" ");
+  return (
+    <filter id={id} colorInterpolationFilters="sRGB">
+      <feColorMatrix type="saturate" values="0" />
+      {t ? (
+        <feComponentTransfer>
+          <feFuncR type="table" tableValues={t} />
+          <feFuncG type="table" tableValues={t} />
+          <feFuncB type="table" tableValues={t} />
+        </feComponentTransfer>
+      ) : null}
+      <feComponentTransfer>
+        <feFuncR type="table" tableValues={palette.r.join(" ")} />
+        <feFuncG type="table" tableValues={palette.g.join(" ")} />
+        <feFuncB type="table" tableValues={palette.b.join(" ")} />
+      </feComponentTransfer>
+    </filter>
+  );
+}
+
 /**
- * Le filtre SVG, défini une seule fois dans le layout (docs/images.md § 4) : noir → heat-0 → … → heat-4.
- * En thème day, la photo filtrée est estompée sur le fond clair (globals.css).
+ * Les filtres communs, définis une seule fois dans le layout (docs/images.md § 4) : #thermal (night,
+ * noir → heat-0 → … → heat-4) et #thermal-day (mêmes couleurs, éclaircies). Ils servent aux photos dont
+ * la courbe de tonalité n'est pas encore calculée et au fond avg_color pendant le chargement.
  */
 export function ThermalFilterDefs() {
   return (
     <svg width="0" height="0" aria-hidden="true" style={{ position: "absolute" }} focusable="false">
-      <filter id="thermal" colorInterpolationFilters="sRGB">
-        <feColorMatrix type="saturate" values="0" />
-        <feComponentTransfer>
-          <feFuncR type="table" tableValues="0.043 0.141 0.482 0.894 1 1" />
-          <feFuncG type="table" tableValues="0.039 0.341 0.235 0.208 0.478 0.847" />
-          <feFuncB type="table" tableValues="0.071 1 1 0.549 0.102 0.302" />
-        </feComponentTransfer>
-      </filter>
+      <ThermalFilter id="thermal" palette={NIGHT_PALETTE} />
+      <ThermalFilter id="thermal-day" palette={DAY_PALETTE} />
     </svg>
   );
 }
